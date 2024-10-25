@@ -1,0 +1,210 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  // directUrl = env("DIRECT_URL")
+}
+
+model Branch {
+  id            Int    @id @default(autoincrement())
+  streetAddress String @unique
+  baranggay     String
+  city          String
+  zipCode       Int
+
+  // PKs
+  users               User[]
+  totalExpensesPerDay TotalExpensesPerDay[]
+  inventories         Inventory[]
+  orders              Order[]
+  profits             Profit[]
+  transactions        Transaction[]
+}
+
+model Customer {
+  id             Int     @id @default(autoincrement())
+  username       String
+  customerNumber Int     @unique
+  orders         Order[]
+}
+
+model Expense {
+  id                    Int                 @id @default(autoincrement())
+  totalExpensesPerDay   TotalExpensesPerDay @relation(fields: [totalExpensesPerDayId], references: [id])
+  totalExpensesPerDayId Int
+  expenseAmount         Int
+  descriptionOfExpense  String
+}
+
+// Inventory
+model Inventory {
+  id                  Int                  @id @default(autoincrement())
+  branch              Branch               @relation(fields: [branchId], references: [id])
+  branchId            Int
+  rawMaterial         RawMaterial          @relation(fields: [rawMaterialId], references: [id])
+  rawMaterialId       Int
+  quantityInUnit      Int
+  stockQuantity       Int
+  isReorderNeeded     Boolean
+  batches             Batch[]
+  systemNotifications SystemNotification[]
+}
+
+// Orders
+
+model Order {
+  id           Int           @id @default(autoincrement())
+  orderedAt    DateTime      @default(now())
+  branch       Branch        @relation(fields: [branchId], references: [id])
+  branchId     Int
+  customer     Customer      @relation(fields: [customerId], references: [id])
+  customerId   Int
+  user         User          @relation(fields: [userId], references: [id])
+  userId       Int
+  totalPrice   Int
+  orderStatus  Boolean
+  orderItems   OrderItem[]
+  transactions Transaction[]
+}
+
+model OrderItem {
+  id Int @id @default(autoincrement())
+
+  order         Order   @relation(fields: [orderId], references: [id])
+  orderId       Int
+  product       Product @relation(fields: [productId], references: [id])
+  productId     Int
+  quantity      Int
+  quanityAmount Int // Total price, quantity * productPrice
+}
+
+// Product Catergory
+model Category {
+  id           Int       @id @default(autoincrement())
+  categoryName String
+  products     Product[]
+}
+
+// Product
+model Product {
+  id          Int         @id @default(autoincrement())
+  category    Category    @relation(fields: [catergoryId], references: [id])
+  catergoryId Int
+  productName String
+  price       Int
+  description String?
+  createdAt   DateTime    @default(now())
+  recipes     Recipe[]
+  orderItems  OrderItem[]
+}
+
+// Profit
+
+model Profit {
+  id                    Int                 @id @default(autoincrement())
+  totalExpensesPerDay   TotalExpensesPerDay @relation(fields: [totalExpensesPerDayId], references: [id])
+  totalExpensesPerDayId Int
+  branch                Branch              @relation(fields: [brachId], references: [id])
+  brachId               Int
+  days                  Int
+  date                  DateTime
+  dailySales            Int
+  dailyProfit           Int
+}
+
+// RawMaterial
+
+model RawMaterial {
+  id                    Int         @id @default(autoincrement())
+  materialName          String
+  quantityInUnitPerItem Int
+  inventores            Inventory[]
+  recipes               Recipe[]
+}
+
+// Recipe
+
+model Recipe {
+  id                      Int         @id @default(autoincrement())
+  product                 Product     @relation(fields: [productId], references: [id])
+  productId               Int
+  rawMaterial             RawMaterial @relation(fields: [rawMaterialId], references: [id])
+  rawMaterialId           Int
+  quantityInUnitPcsNeeded Int
+}
+
+// Role
+model Role {
+  id       Int    @id @default(autoincrement())
+  roleName String
+  users    User[]
+}
+
+model TotalExpensesPerDay {
+  id            Int       @id @default(autoincrement())
+  branch        Branch    @relation(fields: [branchId], references: [id])
+  branchId      Int
+  days          Int
+  date          DateTime
+  totalExpenses Int
+  expenses      Expense[]
+  profits       Profit[]
+}
+
+model Transaction {
+  id              Int      @id @default(autoincrement())
+  order           Order    @relation(fields: [orderId], references: [id])
+  orderId         Int
+  branch          Branch   @relation(fields: [branchId], references: [id])
+  branchId        Int
+  paymentMethod   String
+  amountPaid      Int
+  transactionDate DateTime @default(now())
+}
+
+model User {
+  id        Int     @id @default(autoincrement())
+  role      Role    @relation(fields: [roleId], references: [id])
+  roleId    Int
+  branch    Branch  @relation(fields: [branchId], references: [id])
+  branchId  Int
+  firstname String
+  lastname  String
+  cpNum     String
+  username  String
+  password  String
+  orders    Order[]
+}
+
+// Less prio table
+
+model Batch {
+  id                  Int       @id @default(autoincrement())
+  inventory           Inventory @relation(fields: [inventoryId], references: [id])
+  inventoryId         Int
+  batchQuantity       Int
+  expirationDate      DateTime
+  recievedDate        DateTime
+  daysUntilExpiration Int // This could generate in frontend
+  notifWarning        Boolean // Triggers to true when daysUntilExpiration is < 10
+  isExpired           Boolean
+  isDisposed          Boolean
+}
+
+model SystemNotification {
+  id               Int       @id @default(autoincrement())
+  inventory        Inventory @relation(fields: [inventoryId], references: [id])
+  inventoryId      Int
+  notificationDate DateTime
+  stauts           String
+  isSolved         Boolean
+}
