@@ -2,10 +2,10 @@ import express, { Application, Request, Response } from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import { PrismaClient } from "@prisma/client";
-import orderRoute from "./routes/orderRoutes";
-import userRouter from "./controllers/user/user";
-import { IUser } from "./types/types";
-import { generateToken, verifyToken } from "./auth/jwt";
+// import orderRoute from "./routes/orderRoutes";
+// import userRouter from "./controllers/user/user";
+// import { IUser } from "./types/types";
+import { generateToken } from "./auth/jwt";
 
 const app: Application = express();
 const prisma = new PrismaClient();
@@ -28,6 +28,10 @@ const PORT = process.env.PORT || 9999;
 //   res.status(500).send("Something broke!");
 //   next(err);
 // })
+
+app.post("/", (_: Request, res: Response) => {
+  res.send("hgotdog ni michael");
+});
 
 app.post("/login", async (req: Request, res: Response) => {
   const body: { username: string; password: string } = req.body;
