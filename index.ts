@@ -29,7 +29,7 @@ const PORT = process.env.PORT || 9999;
 //   next(err);
 // })
 
-app.post("/", (_: Request, res: Response) => {
+app.get("/", (_: Request, res: Response) => {
   res.send("hgotdog ni michael");
 });
 
