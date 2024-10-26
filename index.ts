@@ -5,7 +5,7 @@ import { PrismaClient } from "@prisma/client";
 // import orderRoute from "./routes/orderRoutes";
 // import userRouter from "./controllers/user/user";
 // import { IUser } from "./types/types";
-import { generateToken } from "./auth/jwt";
+import { generateToken, verifyToken } from "./auth/jwt";
 
 const app: Application = express();
 const prisma = new PrismaClient();
@@ -29,9 +29,13 @@ const PORT = process.env.PORT || 9999;
 //   next(err);
 // })
 
-app.use("/", (_: Request, res: Response) => {
-  res.send("hgotdog ni michael");
-});
+// Initialize roles
+
+// app.use("/", async (_: Request, res: Response) => {
+//   res.send(await prisma.role.findMany());
+// });
+
+app.get("/profile", verifyToken, (req, res) => {});
 
 app.post("/login", async (req: Request, res: Response) => {
   const body: { username: string; password: string } = req.body;
@@ -48,7 +52,7 @@ app.post("/login", async (req: Request, res: Response) => {
     return;
   }
 
-  const generated = generateToken(user);
+  const generated = await generateToken(user);
 
   res.json({ token: generated });
 

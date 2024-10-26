@@ -9,9 +9,9 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
-  // directUrl = env("DIRECT_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model Branch {
@@ -70,7 +70,7 @@ model Order {
   customerId   Int
   user         User          @relation(fields: [userId], references: [id])
   userId       Int
-  totalPrice   Int
+  totalPrice   Int           @default(0)
   orderStatus  Boolean
   orderItems   OrderItem[]
   transactions Transaction[]
@@ -79,12 +79,12 @@ model Order {
 model OrderItem {
   id Int @id @default(autoincrement())
 
-  order         Order   @relation(fields: [orderId], references: [id])
-  orderId       Int
-  product       Product @relation(fields: [productId], references: [id])
-  productId     Int
-  quantity      Int
-  quanityAmount Int // Total price, quantity * productPrice
+  order          Order   @relation(fields: [orderId], references: [id])
+  orderId        Int
+  product        Product @relation(fields: [productId], references: [id])
+  productId      Int
+  quantity       Int
+  quantityAmount Int // Total price, quantity * productPrice
 }
 
 // Product Catergory

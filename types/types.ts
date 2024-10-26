@@ -37,6 +37,14 @@ export interface IOrder {
   orderStatus: boolean;
 }
 
+export interface IOrderItem {
+  id: number;
+  orderId: number;
+  productId: number;
+  quantity: number;
+  quanityAmount: number;
+}
+
 export interface ICategory {
   id: number;
   categoryName: string;

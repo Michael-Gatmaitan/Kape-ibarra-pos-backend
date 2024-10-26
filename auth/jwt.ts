@@ -1,14 +1,16 @@
+import prisma from "../config/db";
 import { Request, Response, NextFunction } from "express";
 import { IUser } from "../types/types";
 import jwt, { Secret } from "jsonwebtoken";
 
 const SECRET_KEY: Secret = process.env.SECRET_KEY as string;
 
-export const generateToken = (user: IUser) => {
-  return jwt.sign(
-    { id: user.id.toString(), role: user.roleId.toString() },
-    SECRET_KEY
-  );
+export const generateToken = async (user: IUser) => {
+  const roleName = (
+    await prisma.role.findFirstOrThrow({ where: { id: user.roleId } })
+  ).roleName;
+
+  return jwt.sign({ id: user.id, roleName }, SECRET_KEY);
 };
 
 export const verifyToken = (
@@ -18,9 +20,13 @@ export const verifyToken = (
 ) => {
   const token = req.headers["authorization"];
 
-  if (!token) return res.status(401).json({ error: "Access denied" });
+  if (!token) {
+    res.status(401).json({ error: "Access denied" });
+    return;
+  }
 
   jwt.verify(token, SECRET_KEY, (error, decoded) => {
-    if (error) return res.status(403).json({ error: "Invalid  token" });
+    if (error) res.status(403).json({ error: "Invalid  token" });
+    // next();
   });
 };
