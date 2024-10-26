@@ -35,7 +35,7 @@ const PORT = process.env.PORT || 9999;
 //   res.status(500).send("Something broke!");
 //   next(err);
 // })
-app.post("/", (_, res) => {
+app.use("/", (_, res) => {
     res.send("hgotdog ni michael");
 });
 app.post("/login", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
