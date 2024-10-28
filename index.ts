@@ -1,14 +1,20 @@
 import express, { Application, Request, Response } from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import { PrismaClient } from "@prisma/client";
+import prisma from "./config/db";
+
 // import orderRoute from "./routes/orderRoutes";
 // import userRouter from "./controllers/user/user";
 // import { IUser } from "./types/types";
 import { generateToken, verifyToken } from "./auth/jwt";
 
+import { Server } from "socket.io";
+import { createServer } from "http";
+
 const app: Application = express();
-const prisma = new PrismaClient();
+
+const server = createServer(app);
+const io = new Server(server);
 
 app.use(express.json());
 app.use(cors());
@@ -35,7 +41,25 @@ const PORT = process.env.PORT || 9999;
 //   res.send(await prisma.role.findMany());
 // });
 
-app.get("/profile", verifyToken, (req, res) => {});
+// app.get("/profile", verifyToken, (req, res) => {});
+
+io.on("connection", () => console.log("A user connected"));
+
+app.post("/product/categories/add", async (req, res) => {
+  const { categoryName }: { categoryName: string } = req.body;
+
+  console.log("afdlkasdflk jal; ");
+
+  const newCategory = await prisma.category.create({
+    data: {
+      categoryName,
+    },
+  });
+
+  io.emit("newCategory", newCategory);
+
+  res.json({ newCategory });
+});
 
 app.post("/login", async (req: Request, res: Response) => {
   const body: { username: string; password: string } = req.body;

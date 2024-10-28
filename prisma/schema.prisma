@@ -30,13 +30,6 @@ model Branch {
   transactions        Transaction[]
 }
 
-model Customer {
-  id             Int     @id @default(autoincrement())
-  username       String
-  customerNumber Int     @unique
-  orders         Order[]
-}
-
 model Expense {
   id                    Int                 @id @default(autoincrement())
   totalExpensesPerDay   TotalExpensesPerDay @relation(fields: [totalExpensesPerDayId], references: [id])
@@ -62,18 +55,17 @@ model Inventory {
 // Orders
 
 model Order {
-  id           Int           @id @default(autoincrement())
-  orderedAt    DateTime      @default(now())
-  branch       Branch        @relation(fields: [branchId], references: [id])
-  branchId     Int
-  customer     Customer      @relation(fields: [customerId], references: [id])
-  customerId   Int
-  user         User          @relation(fields: [userId], references: [id])
-  userId       Int
-  totalPrice   Int           @default(0)
-  orderStatus  Boolean
-  orderItems   OrderItem[]
-  transactions Transaction[]
+  id             Int           @id @default(autoincrement())
+  orderedAt      DateTime      @default(now())
+  branchId       Int
+  userId         Int
+  customerNumber Int           @default(autoincrement())
+  totalPrice     Int           @default(0)
+  orderStatus    Boolean       @default(false)
+  branch         Branch        @relation(fields: [branchId], references: [id])
+  user           User          @relation(fields: [userId], references: [id])
+  orderItems     OrderItem[]
+  transactions   Transaction[]
 }
 
 model OrderItem {

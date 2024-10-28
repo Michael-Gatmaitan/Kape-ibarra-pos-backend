@@ -1,5 +1,8 @@
+import { Prisma } from "@prisma/client";
 import prisma from "../config/db";
-import { IOrder, IOrderItem } from "../types/types";
+import { IOrderItemCreateBody } from "../types/types";
+
+import { OrderItem } from "@prisma/client";
 // OrderItem and Orders will implemented here
 
 // We will base all of the id on USER eg cashier
@@ -15,63 +18,45 @@ export const getOrderItemsById = async (id: number) => {
   return await prisma.orderItem.findFirst({ where: { id } });
 };
 
-// export const createOrderItems = async (data: IOrderItem[]) => {
-//   return await prisma.orderItem.createMany({
-
-//   })
-// }
-
-export const createOrderItems = async (data: IOrderItem[]) => {
-  return await prisma.orderItem.createManyAndReturn({
-    data,
-  });
-};
-// Create
-export const createOrderItem = async (data: IOrderItem) => {
-  return await prisma.orderItem.create({ data });
-};
-
 // Delete
 export const deleteOrderItem = async (id: number) => {
   return await prisma.orderItem.delete({ where: { id } });
 };
 
-export const updateOrderItem = async (id: number, data: IOrderItem) => {
+export const updateOrderItem = async (
+  id: number,
+  data: IOrderItemCreateBody
+) => {
   return await prisma.orderItem.update({ where: { id }, data });
 };
 
-// For Order
-
-export const createOrder = async (data: IOrder) => {
-  return await prisma.order.create({ data });
-};
-
-export const updateOrder = async (id: number, data: IOrder) => {
-  return await prisma.order.update({ where: { id }, data });
-};
-
-// export const createOrders = async (data: IOrder[]) => {
-//   return await prisma.order.createManyAndReturn({
-//     data
-//   });
-// }
-
-export const createManyOrderItemsAndReferenceToNewOrder = async (
-  data: IOrderItem[]
+export const createOrder = async (
+  orderBody: { branchId: number; userId: number },
+  orderItemsBody: Prisma.OrderItemCreateManyInput
 ) => {
-  await prisma.order.create({
+  // return await prisma.order.create({ data });
+  const { branchId, userId } = orderBody;
+
+  const newOrder = await prisma.order.create({
     data: {
-      branchId: 1,
-      customerId: 1,
-      totalPrice: 0,
+      branchId,
+      userId,
       orderStatus: false,
-      userId: 1,
 
       orderItems: {
         createMany: {
-          data,
+          data: orderItemsBody,
         },
       },
     },
   });
+
+  console.log(newOrder);
+};
+
+export const updateOrder = async (
+  id: number,
+  data: Prisma.OrderUpdateInput
+) => {
+  return await prisma.order.update({ where: { id }, data });
 };
