@@ -8,7 +8,7 @@ import orderRoute from "./routes/orderRoutes";
 import productRoute from "./routes/productRoutes";
 import categoryRoute from "./routes/categoryRoutes";
 import branchRoute from "./routes/branchRoutes";
-import { generateToken } from "./auth/jwt";
+// import { generateToken } from "./auth/jwt";
 
 import { Server } from "socket.io";
 import { createServer } from "http";
@@ -52,44 +52,44 @@ app.use("/order", orderRoute);
 
 io.on("connection", () => console.log("A user connected"));
 
-app.post("/product/categories/add", async (req, res) => {
-  const { categoryName }: { categoryName: string } = req.body;
+// app.post("/product/categories/add", async (req, res) => {
+//   const { categoryName }: { categoryName: string } = req.body;
 
-  console.log("afdlkasdflk jal; ");
+//   console.log("afdlkasdflk jal; ");
 
-  const newCategory = await prisma.category.create({
-    data: {
-      categoryName,
-    },
-  });
+//   const newCategory = await prisma.category.create({
+//     data: {
+//       categoryName,
+//     },
+//   });
 
-  io.emit("newCategory", newCategory);
+//   io.emit("newCategory", newCategory);
 
-  res.json({ newCategory });
-});
+//   res.json({ newCategory });
+// });
 
-app.post("/login", async (req: Request, res: Response) => {
-  const body: { username: string; password: string } = req.body;
+// app.post("/login", async (req: Request, res: Response) => {
+//   const body: { username: string; password: string } = req.body;
 
-  const user = await prisma.user.findFirst({
-    where: {
-      username: body.username,
-      password: body.password,
-    },
-  });
+//   const user = await prisma.user.findFirst({
+//     where: {
+//       username: body.username,
+//       password: body.password,
+//     },
+//   });
 
-  if (user === null) {
-    res.json({ error: "User could not find" }).status(401);
-    return;
-  }
+//   if (user === null) {
+//     res.json({ error: "User could not find" }).status(401);
+//     return;
+//   }
 
-  const generated = await generateToken(user);
+//   const generated = await generateToken(user);
 
-  res.json({ token: generated });
+//   res.json({ token: generated });
 
-  // console.log(req.headers["authorization"]);
-  // return both generatedKey and
-});
+//   // console.log(req.headers["authorization"]);
+//   // return both generatedKey and
+// });
 
 app.listen(PORT, () => {
   console.log(`Connected to port ${PORT}`);
