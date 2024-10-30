@@ -9,9 +9,9 @@ generator client {
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  // directUrl = env("DIRECT_URL")
 }
 
 model Branch {
@@ -89,8 +89,8 @@ model Category {
 // Product
 model Product {
   id          Int         @id @default(autoincrement())
-  category    Category    @relation(fields: [catergoryId], references: [id])
-  catergoryId Int
+  category    Category    @relation(fields: [categoryId], references: [id])
+  categoryId  Int
   productName String
   price       Int
   description String?

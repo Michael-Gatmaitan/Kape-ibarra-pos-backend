@@ -3,10 +3,12 @@ import cors from "cors";
 import dotenv from "dotenv";
 import prisma from "./config/db";
 
-// import orderRoute from "./routes/orderRoutes";
-// import userRouter from "./controllers/user/user";
-// import { IUser } from "./types/types";
-import { generateToken, verifyToken } from "./auth/jwt";
+import userRoute from "./routes/userRoutes";
+import orderRoute from "./routes/orderRoutes";
+import productRoute from "./routes/productRoutes";
+import categoryRoute from "./routes/categoryRoutes";
+import branchRoute from "./routes/branchRoutes";
+import { generateToken } from "./auth/jwt";
 
 import { Server } from "socket.io";
 import { createServer } from "http";
@@ -23,7 +25,12 @@ dotenv.config();
 
 const PORT = process.env.PORT || 9999;
 
-// app.use("/order", orderRoute);
+app.use("/user", userRoute);
+app.use("/branch", branchRoute);
+app.use("/product", productRoute);
+app.use("/category", categoryRoute);
+app.use("/order", orderRoute);
+
 // app.use("/user", userRouter);
 
 // Setup initial db

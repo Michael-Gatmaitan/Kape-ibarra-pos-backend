@@ -1,5 +1,5 @@
+import { Prisma } from "@prisma/client";
 import prisma from "../config/db";
-import { IUser, UserCreateBody } from "../types/types";
 
 // Get
 export const getAllUsers = async () => {
@@ -13,14 +13,14 @@ export const getUserById = async (id: number) => {
 };
 
 // Create
-export const createUser = async (data: UserCreateBody) => {
+export const createUser = async (data: Prisma.UserCreateInput) => {
   return await prisma.user.create({
     data,
   });
 };
 
 // Update
-export const updateUser = async (id: number, data: UserCreateBody) => {
+export const updateUser = async (id: number, data: Prisma.UserUpdateInput) => {
   return await prisma.user.update({
     where: { id },
     data,

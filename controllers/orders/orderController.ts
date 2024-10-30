@@ -1,26 +1,73 @@
 import { Request, Response } from "express";
 import prisma from "../../config/db";
+import { Prisma } from "@prisma/client";
+import { ICreateOrderBody, ICreateOrderItemBody } from "../../types/types";
+
+interface ICreateOrderSelf {
+  orderBody: ICreateOrderBody;
+  orderItemsBody: Prisma.OrderItemUncheckedCreateInput[];
+  transactionBody: Prisma.TransactionUncheckedCreateInput;
+}
+
+/**
+ *
+ * @param orderBody
+ *        { branchId, userId }
+ * @param orderItemsBody
+ *        [{
+ *          productId
+ *          quantity
+ *          quantityAmount
+ *        }]
+ *
+ * @param transactionBody
+ *        {
+ *          amountPaid
+ *          paymentMethod
+ *          branchId
+ *        }
+ *
+ */
 
 export const createOrder = async (req: Request, res: Response) => {
-  console.log("create order");
-  // res.json({ here: "ASDASD" });
-  res.json({ asdas: "ASDASDssss" });
-  // res.status(20).json("create order");
+  const { orderBody, orderItemsBody, transactionBody }: ICreateOrderSelf =
+    req.body;
+  const { branchId, userId } = orderBody;
 
-  // create order first before referencing orderitems to it
-};
+  const result = await prisma.$transaction(async (prisma) => {
+    orderItemsBody.map(async (item) => {
+      const product = await prisma.product.findFirst({
+        where: { id: item.productId },
+      });
 
-export const readOrder = async (req: Request, res: Response) => {
-  console.log("read order");
-  res.json({ ASD: "ASDASD" });
-};
+      console.log(product);
 
-export const updateOrder = async (req: Request, res: Response) => {
-  console.log("update order");
-  // res.status(20).json("update order");
-};
+      return (item.quantityAmount = product!.price * item.quantity);
+    });
 
-export const deleteOrder = async (req: Request, res: Response) => {
-  console.log("delete order");
-  // res.status(20).json("delete order");
+    console.log(orderItemsBody);
+
+    const newOrder = await prisma.order.create({
+      data: {
+        branchId,
+        userId,
+
+        orderItems: {
+          createMany: {
+            data: orderItemsBody,
+          },
+        },
+
+        transactions: {
+          create: transactionBody,
+        },
+      },
+    });
+
+    return newOrder;
+  });
+
+  // const newOrder =
+
+  res.json(result);
 };

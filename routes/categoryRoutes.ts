@@ -1,9 +1,10 @@
 import express, { Router } from "express";
-import { createOrder } from "../controllers/orders/orderController";
+import { createCategory } from "../controllers/category/categoryController";
 
 const router: Router = express.Router();
 
-router.post("/", createOrder);
+// router.get("/", readOrder);
+router.post("/", createCategory);
 // router.put("/", updateOrder);
 // router.delete("/", deleteOrder);
 

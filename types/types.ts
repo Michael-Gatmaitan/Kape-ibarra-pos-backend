@@ -131,98 +131,24 @@ export interface ISystemNotification {
   isSolved: boolean;
 }
 
-export type IBranchCreateBody = Prisma.XOR<
-  Prisma.BranchCreateInput,
-  Prisma.BranchUncheckedCreateInput
->;
-export type IExpenseCreateBody = Prisma.XOR<
-  Prisma.ExpenseCreateInput,
-  Prisma.ExpenseUncheckedCreateInput
->;
-export type IInventoryCreateBody = Prisma.XOR<
-  Prisma.InventoryCreateInput,
-  Prisma.InventoryUncheckedCreateInput
->;
-export type IOrderCreateBody = Prisma.XOR<
-  Prisma.OrderCreateInput,
-  Prisma.OrderUncheckedCreateInput
->;
-export type IOrderItemCreateBody = Prisma.XOR<
-  Prisma.OrderItemCreateInput,
-  Prisma.OrderItemUncheckedCreateInput
->;
-export type ICategoryCreateBody = Prisma.XOR<
-  Prisma.CategoryCreateInput,
-  Prisma.CategoryUncheckedCreateInput
->;
-export type IProductCreateBody = Prisma.XOR<
-  Prisma.ProductCreateInput,
-  Prisma.ProductUncheckedCreateInput
->;
-export type IProfitCreateBody = Prisma.XOR<
-  Prisma.ProfitCreateInput,
-  Prisma.ProfitUncheckedCreateInput
->;
-export type IRawMaterialCreateBody = Prisma.XOR<
-  Prisma.RawMaterialCreateInput,
-  Prisma.RawMaterialUncheckedCreateInput
->;
-export type IRecipeCreateBody = Prisma.XOR<
-  Prisma.RecipeCreateInput,
-  Prisma.RecipeUncheckedCreateInput
->;
-export type IRoleCreateBody = Prisma.XOR<
-  Prisma.RoleCreateInput,
-  Prisma.RoleUncheckedCreateInput
->;
-export type ITotalExpensesPerDayCreateBody = Prisma.XOR<
-  Prisma.TotalExpensesPerDayCreateInput,
-  Prisma.TotalExpensesPerDayUncheckedCreateInput
->;
-export type ITransactionCreateBody = Prisma.XOR<
-  Prisma.TransactionCreateInput,
-  Prisma.TransactionUncheckedCreateInput
->;
-export type IUserCreateBody = Prisma.XOR<
-  Prisma.UserCreateInput,
-  Prisma.UserUncheckedCreateInput
->;
-export type IBatchCreateBody = Prisma.XOR<
-  Prisma.BatchCreateInput,
-  Prisma.BatchUncheckedCreateInput
->;
-export type ISystemNotificationCreateBody = Prisma.XOR<
-  Prisma.SystemNotificationCreateInput,
-  Prisma.SystemNotificationUncheckedCreateInput
->;
+export type ICreateBranchBody = Prisma.BranchUncheckedCreateInput;
 
-export type IBranchCreateManyBody =
-  Prisma.Enumerable<Prisma.BranchCreateManyInput>;
-export type IExpenseCreateManyBody =
-  Prisma.Enumerable<Prisma.ExpenseCreateManyInput>;
-export type IInventoryCreateManyBody =
-  Prisma.Enumerable<Prisma.InventoryCreateManyInput>;
-export type IOrderCreateManyBody =
-  Prisma.Enumerable<Prisma.OrderCreateManyInput>;
-export type IOrderItemCreateManyBody =
-  Prisma.Enumerable<Prisma.OrderItemCreateManyInput>;
-export type ICategoryCreateManyBody =
-  Prisma.Enumerable<Prisma.CategoryCreateManyInput>;
-export type IProductCreateManyBody =
-  Prisma.Enumerable<Prisma.ProductCreateManyInput>;
-export type IProfitCreateManyBody =
-  Prisma.Enumerable<Prisma.ProfitCreateManyInput>;
-export type IRawMaterialCreateManyBody =
-  Prisma.Enumerable<Prisma.RawMaterialCreateManyInput>;
-export type IRecipeCreateManyBody =
-  Prisma.Enumerable<Prisma.RecipeCreateManyInput>;
-export type IRoleCreateManyBody = Prisma.Enumerable<Prisma.RoleCreateManyInput>;
-export type ITotalExpensesPerDayCreateManyBody =
-  Prisma.Enumerable<Prisma.TotalExpensesPerDayCreateManyInput>;
-export type ITransactionCreateManyBody =
-  Prisma.Enumerable<Prisma.TransactionCreateManyInput>;
-export type IUserCreateManyBody = Prisma.Enumerable<Prisma.UserCreateManyInput>;
-export type IBatchCreateManyBody =
-  Prisma.Enumerable<Prisma.BatchCreateManyInput>;
-export type ISystemNotificationCreateManyBody =
-  Prisma.Enumerable<Prisma.SystemNotificationCreateManyInput>;
+export type ICreateProductBody = Prisma.ProductUncheckedCreateInput;
+
+export type ICreateOrderBody = Prisma.OrderUncheckedCreateInput;
+
+export type ICreateOrderItemBody = Prisma.OrderItemUncheckedCreateInput;
+
+export type ICreateCategoryBody = Prisma.CategoryUncheckedCreateInput;
+
+export type ICreateProfitBody = Prisma.ProfitUncheckedCreateInput;
+
+export type ICreateRecipeBody = Prisma.RecipeUncheckedCreateInput;
+
+export type ICreateRoleBody = Prisma.RoleUncheckedCreateInput;
+
+export type ICreateUserBody = Prisma.UserUncheckedCreateInput;
+
+// Update
+
+export type IUpdateOrderItemBody = Prisma.OrderItemUncheckedUpdateInput;
