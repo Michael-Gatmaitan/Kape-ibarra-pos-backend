@@ -1,7 +1,7 @@
 import express, { Application, Request, Response } from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import prisma from "./config/db";
+// import prisma from "./config/db";
 
 import userRoute from "./routes/userRoutes";
 import orderRoute from "./routes/orderRoutes";
@@ -10,13 +10,13 @@ import categoryRoute from "./routes/categoryRoutes";
 import branchRoute from "./routes/branchRoutes";
 // import { generateToken } from "./auth/jwt";
 
-import { Server } from "socket.io";
-import { createServer } from "http";
+// import { Server } from "socket.io";
+// import { createServer } from "http";
 
 const app: Application = express();
 
-const server = createServer(app);
-const io = new Server(server);
+// const server = createServer(app);
+// const io = new Server(server);
 
 app.use(express.json());
 app.use(cors());
@@ -50,7 +50,7 @@ app.use("/order", orderRoute);
 
 // app.get("/profile", verifyToken, (req, res) => {});
 
-io.on("connection", () => console.log("A user connected"));
+// io.on("connection", () => console.log("A user connected"));
 
 // app.post("/product/categories/add", async (req, res) => {
 //   const { categoryName }: { categoryName: string } = req.body;
