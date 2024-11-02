@@ -1,22 +1,29 @@
 import express, { Application, Request, Response } from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-// import prisma from "./config/db";
 
+// Routes
 import userRoute from "./routes/userRoutes";
 import orderRoute from "./routes/orderRoutes";
 import productRoute from "./routes/productRoutes";
 import categoryRoute from "./routes/categoryRoutes";
 import branchRoute from "./routes/branchRoutes";
+import roleRoute from "./routes/roleRoutes";
+import rawMaterialRoute from "./routes/rawMaterialRoutes";
+
+import prisma from "./config/db";
+import { generateToken } from "./auth/jwt";
 // import { generateToken } from "./auth/jwt";
 
-// import { Server } from "socket.io";
-// import { createServer } from "http";
+import { Server } from "socket.io";
+import { createServer } from "http";
 
 const app: Application = express();
 
-// const server = createServer(app);
-// const io = new Server(server);
+const server = createServer(app);
+const io = new Server(server);
+
+io.on("connection", (socket) => console.log("Connected: ", socket.id));
 
 app.use(express.json());
 app.use(cors());
@@ -30,6 +37,8 @@ app.use("/branch", branchRoute);
 app.use("/product", productRoute);
 app.use("/category", categoryRoute);
 app.use("/order", orderRoute);
+app.use("/role", roleRoute);
+app.use("/rawMaterial", rawMaterialRoute);
 
 // app.use("/user", userRouter);
 
@@ -68,28 +77,25 @@ app.use("/order", orderRoute);
 //   res.json({ newCategory });
 // });
 
-// app.post("/login", async (req: Request, res: Response) => {
-//   const body: { username: string; password: string } = req.body;
+app.post("/login", async (req: Request, res: Response) => {
+  const body: { username: string; password: string } = req.body;
 
-//   const user = await prisma.user.findFirst({
-//     where: {
-//       username: body.username,
-//       password: body.password,
-//     },
-//   });
+  const user = await prisma.user.findFirst({
+    where: {
+      username: body.username,
+      password: body.password,
+    },
+  });
 
-//   if (user === null) {
-//     res.json({ error: "User could not find" }).status(401);
-//     return;
-//   }
+  if (user === null) {
+    res.json({ error: "User could not find" }).status(401);
+    return;
+  }
 
-//   const generated = await generateToken(user);
+  const generated = await generateToken(user);
 
-//   res.json({ token: generated });
-
-//   // console.log(req.headers["authorization"]);
-//   // return both generatedKey and
-// });
+  res.json({ token: generated });
+});
 
 app.listen(PORT, () => {
   console.log(`Connected to port ${PORT}`);

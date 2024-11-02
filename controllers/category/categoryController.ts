@@ -7,8 +7,10 @@ import {
 } from "../../models/categoryModel";
 import { ICreateCategoryBody } from "../../types/types";
 
-export const getCategories = async () => {
-  return await prisma.category.findMany();
+export const getCategories = async (req: Request, res: Response) => {
+  const categories = await prisma.category.findMany();
+
+  res.json(categories).status(200);
 };
 
 export const createCategory = async (req: Request, res: Response) => {
@@ -20,7 +22,7 @@ export const createCategory = async (req: Request, res: Response) => {
     res.json({ error: "Creation of category failed." });
   }
 
-  res.json({ newCategory });
+  res.json(newCategory).status(200);
 };
 
 export interface IUpdateCategoryBody {

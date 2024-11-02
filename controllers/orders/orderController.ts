@@ -35,17 +35,35 @@ export const createOrder = async (req: Request, res: Response) => {
   const { branchId, userId } = orderBody;
 
   const result = await prisma.$transaction(async (prisma) => {
-    orderItemsBody.map(async (item) => {
-      const product = await prisma.product.findFirst({
-        where: { id: item.productId },
-      });
+    // orderItemsBody.forEach(async (item) => {
+    //   const product = await prisma.product.findFirst({
+    //     where: { id: item.productId },
+    //   });
 
-      console.log(product);
+    //   console.log(product);
 
-      return (item.quantityAmount = product!.price * item.quantity);
-    });
+    //   return (item.quantityAmount = product!.price * item.quantity);
+    // });
 
     console.log(orderItemsBody);
+
+    const productIds = orderItemsBody.map((item) => item.productId);
+    const products = await prisma.product.findMany({
+      where: { id: { in: productIds } },
+      select: { id: true, price: true },
+    });
+
+    const productPriceMap = products.reduce((acc, product) => {
+      acc[product.id] = product.price;
+      return acc;
+    }, {} as Record<number, number>);
+
+    console.log(productPriceMap);
+
+    const updatedOrderItemsBody = orderItemsBody.map((item) => ({
+      ...item,
+      quantityAmount: item.quantity * (productPriceMap[item.productId] || 0),
+    }));
 
     const newOrder = await prisma.order.create({
       data: {
@@ -54,7 +72,7 @@ export const createOrder = async (req: Request, res: Response) => {
 
         orderItems: {
           createMany: {
-            data: orderItemsBody,
+            data: updatedOrderItemsBody,
           },
         },
 
@@ -64,10 +82,10 @@ export const createOrder = async (req: Request, res: Response) => {
       },
     });
 
+    // get the order base on order Id OR get order base on orderBodyItems
+
     return newOrder;
   });
-
-  // const newOrder =
 
   res.json(result);
 };

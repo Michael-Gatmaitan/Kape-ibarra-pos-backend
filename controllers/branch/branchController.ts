@@ -10,7 +10,7 @@ export const getBranches = async (req: Request, res: Response) => {
 
 export const createBranch = async (req: Request, res: Response) => {
   const body: ICreateBranchBody = req.body;
-  // const { baranggay, city, streetAddress, zipCode } = body;
+  // const { region, province, contactNumber, baranggay, city, streetAddress, zipCode } = body;
 
   console.log("New branch created");
 

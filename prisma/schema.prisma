@@ -9,9 +9,9 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
-  // directUrl = env("DIRECT_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model Branch {
@@ -20,6 +20,10 @@ model Branch {
   baranggay     String
   city          String
   zipCode       Int
+
+  province      String
+  region        String
+  contactNumber String
 
   // PKs
   users               User[]
