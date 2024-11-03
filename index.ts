@@ -97,6 +97,20 @@ app.post("/login", async (req: Request, res: Response) => {
   res.json({ token: generated });
 });
 
+app.post("/signup", async (req: Request, res: Response) => {
+  const body = req.body;
+  body.roleId = parseInt(body.roleId);
+  body.branchId = parseInt(body.branchId);
+
+  const newUser = await prisma.user.create({
+    data: body,
+  });
+
+  console.log(newUser);
+
+  res.json(newUser);
+});
+
 app.listen(PORT, () => {
   console.log(`Connected to port ${PORT}`);
 });

@@ -35,18 +35,6 @@ export const createOrder = async (req: Request, res: Response) => {
   const { branchId, userId } = orderBody;
 
   const result = await prisma.$transaction(async (prisma) => {
-    // orderItemsBody.forEach(async (item) => {
-    //   const product = await prisma.product.findFirst({
-    //     where: { id: item.productId },
-    //   });
-
-    //   console.log(product);
-
-    //   return (item.quantityAmount = product!.price * item.quantity);
-    // });
-
-    console.log(orderItemsBody);
-
     const productIds = orderItemsBody.map((item) => item.productId);
     const products = await prisma.product.findMany({
       where: { id: { in: productIds } },
