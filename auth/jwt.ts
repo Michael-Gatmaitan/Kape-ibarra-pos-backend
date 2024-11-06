@@ -27,6 +27,6 @@ export const verifyToken = (
 
   jwt.verify(token, SECRET_KEY, (error, decoded) => {
     if (error) res.status(403).json({ error: "Invalid  token" });
-    // next();
+    next();
   });
 };

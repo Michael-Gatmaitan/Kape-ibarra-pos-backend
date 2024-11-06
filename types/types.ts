@@ -2,7 +2,7 @@ import { Prisma } from "@prisma/client";
 import prisma from "../config/db";
 
 export interface IBranch {
-  id: number;
+  id: string;
   streetAddress: string;
   baranggay: string;
   city: string;
@@ -10,26 +10,26 @@ export interface IBranch {
 }
 
 export interface IExpense {
-  id: number;
-  totalExpensesPerDayId: number;
+  id: string;
+  totalExpensesPerDayId: string;
   expenseAmount: number;
 }
 
 export interface IInventory {
-  id: number;
-  branchId: number;
-  rawMaterialId: number;
+  id: string;
+  branchId: string;
+  rawMaterialId: string;
   quantityInUnit: number;
   stockQuantity: number;
   isReorderNeeded: boolean;
 }
 
 export interface IOrder {
-  id: number;
+  id: string;
   orderedAt: string;
-  branchId: number;
-  userId: number;
-  customerId: number;
+  branchId: string;
+  userId: string;
+  customerId: string;
   userNumber: string;
   totalPrice: number;
   orderStatus: boolean;
@@ -38,9 +38,9 @@ export interface IOrder {
 export type OrderCreate = Pick<IOrder, "branchId" | "userId">;
 
 export interface IOrderItem {
-  id: number;
-  orderId: number;
-  productId: number;
+  id: string;
+  orderId: string;
+  productId: string;
   quantity: number;
   quantityAmount: number;
 }
@@ -48,14 +48,13 @@ export interface IOrderItem {
 export type OrderItemCreate = Pick<IOrderItem, "quantityAmount" | "quantity">;
 
 export interface ICategory {
-  id: number;
+  id: string;
   categoryName: string;
-  // product?:
 }
 
 export interface IProduct {
-  id: number;
-  catergoryId: number;
+  id: string;
+  catergoryId: string;
   productName: string;
   price: number;
   description?: string;
@@ -63,9 +62,9 @@ export interface IProduct {
 }
 
 export interface IProfit {
-  id: number;
-  totalExpensesPerDayId: number;
-  brachId: number;
+  id: string;
+  totalExpensesPerDayId: string;
+  brachId: string;
   days: number;
   date: string;
   dailySales: number;
@@ -73,39 +72,39 @@ export interface IProfit {
 }
 
 export interface IRawMaterial {
-  id: number;
+  id: string;
   materialName: string;
   quantityInUnitPerItem: number;
 }
 
 export interface IRecipe {
-  id: number;
-  productId: number;
-  rawMaterialId: number;
+  id: string;
+  productId: string;
+  rawMaterialId: string;
   quantityInUnitPcsNeeded: number;
 }
 export interface IRole {
-  id: number;
+  id: string;
   rolename: string;
 }
 export interface ITotalExpensesPerDay {
-  id: number;
-  branchId: number;
+  id: string;
+  branchId: string;
   days: number;
   date: string;
   totalExpenses: number;
 }
 export interface ITransaction {
-  id: number;
-  orderId: number;
-  branchId: number;
+  id: string;
+  orderId: string;
+  branchId: string;
   paymentMethod: string;
-  amountPaid: number;
+  amountPaid: string;
 }
 export interface IUser {
-  id: number;
-  roleId: number;
-  branchId: number;
+  id: string;
+  roleId: string;
+  branchId: string;
   firstname: string;
   lastname: string;
   cpNum: string;
@@ -113,8 +112,8 @@ export interface IUser {
   password: string;
 }
 export interface IBatch {
-  id: number;
-  inventoryId: number;
+  id: string;
+  inventoryId: string;
   batchQuantity: number;
   expirationDate: string;
   recievedDate: string;
@@ -124,8 +123,8 @@ export interface IBatch {
   isDisposed: boolean;
 }
 export interface ISystemNotification {
-  id: number;
-  inventoryId: number;
+  id: string;
+  inventoryId: string;
   notificationDate: string;
   stauts: string;
   isSolved: boolean;

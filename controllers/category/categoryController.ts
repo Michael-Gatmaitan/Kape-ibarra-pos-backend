@@ -26,7 +26,7 @@ export const createCategory = async (req: Request, res: Response) => {
 };
 
 export interface IUpdateCategoryBody {
-  id: number;
+  id: string;
   data: Prisma.CategoryUpdateInput;
 }
 export const updateCategory = async (req: Request, res: Response) => {
@@ -35,4 +35,4 @@ export const updateCategory = async (req: Request, res: Response) => {
   await updateCategoryModel(body);
 };
 
-export const deleteCategoryById = async (id: number) => {};
+export const deleteCategoryById = async (id: string) => {};

@@ -9,13 +9,13 @@ generator client {
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  // directUrl = env("DIRECT_URL")
 }
 
 model Branch {
-  id            Int    @id @default(autoincrement())
+  id            String @id @default(uuid())
   streetAddress String @unique
   baranggay     String
   city          String
@@ -35,20 +35,20 @@ model Branch {
 }
 
 model Expense {
-  id                    Int                 @id @default(autoincrement())
+  id                    String              @id @default(uuid())
   totalExpensesPerDay   TotalExpensesPerDay @relation(fields: [totalExpensesPerDayId], references: [id])
-  totalExpensesPerDayId Int
+  totalExpensesPerDayId String
   expenseAmount         Int
   descriptionOfExpense  String
 }
 
 // Inventory
 model Inventory {
-  id                  Int                  @id @default(autoincrement())
+  id                  String               @id @default(uuid())
   branch              Branch               @relation(fields: [branchId], references: [id])
-  branchId            Int
+  branchId            String
   rawMaterial         RawMaterial          @relation(fields: [rawMaterialId], references: [id])
-  rawMaterialId       Int
+  rawMaterialId       String
   quantityInUnit      Int
   stockQuantity       Int
   isReorderNeeded     Boolean
@@ -59,10 +59,10 @@ model Inventory {
 // Orders
 
 model Order {
-  id             Int           @id @default(autoincrement())
+  id             String        @id @default(uuid())
   orderedAt      DateTime      @default(now())
-  branchId       Int
-  userId         Int
+  branchId       String
+  userId         String
   customerNumber Int           @default(autoincrement())
   totalPrice     Int           @default(0)
   orderStatus    Boolean       @default(false)
@@ -73,28 +73,28 @@ model Order {
 }
 
 model OrderItem {
-  id Int @id @default(autoincrement())
+  id String @id @default(uuid())
 
   order          Order   @relation(fields: [orderId], references: [id])
-  orderId        Int
+  orderId        String
   product        Product @relation(fields: [productId], references: [id])
-  productId      Int
+  productId      String
   quantity       Int
   quantityAmount Int // Total price, quantity * productPrice
 }
 
 // Product Catergory
 model Category {
-  id           Int       @id @default(autoincrement())
+  id           String    @id @default(uuid())
   categoryName String
   products     Product[]
 }
 
 // Product
 model Product {
-  id          Int         @id @default(autoincrement())
+  id          String      @id @default(uuid())
   category    Category    @relation(fields: [categoryId], references: [id])
-  categoryId  Int
+  categoryId  String
   productName String
   price       Int
   description String?
@@ -106,11 +106,11 @@ model Product {
 // Profit
 
 model Profit {
-  id                    Int                 @id @default(autoincrement())
+  id                    String              @id @default(uuid())
   totalExpensesPerDay   TotalExpensesPerDay @relation(fields: [totalExpensesPerDayId], references: [id])
-  totalExpensesPerDayId Int
+  totalExpensesPerDayId String
   branch                Branch              @relation(fields: [brachId], references: [id])
-  brachId               Int
+  brachId               String
   days                  Int
   date                  DateTime
   dailySales            Int
@@ -120,9 +120,10 @@ model Profit {
 // RawMaterial
 
 model RawMaterial {
-  id                    Int         @id @default(autoincrement())
+  id                    String      @id @default(uuid())
   materialName          String
   quantityInUnitPerItem Int
+  rawPrice              Int
   inventores            Inventory[]
   recipes               Recipe[]
 }
@@ -130,25 +131,26 @@ model RawMaterial {
 // Recipe
 
 model Recipe {
-  id                      Int         @id @default(autoincrement())
-  product                 Product     @relation(fields: [productId], references: [id])
-  productId               Int
+  id                      String      @id @default(uuid())
+  product                 Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId               String
   rawMaterial             RawMaterial @relation(fields: [rawMaterialId], references: [id])
-  rawMaterialId           Int
+  rawMaterialId           String
   quantityInUnitPcsNeeded Int
+  rawCost                 Int         @default(0)
 }
 
 // Role
 model Role {
-  id       Int    @id @default(autoincrement())
+  id       String @id @default(uuid())
   roleName String
   users    User[]
 }
 
 model TotalExpensesPerDay {
-  id            Int       @id @default(autoincrement())
+  id            String    @id @default(uuid())
   branch        Branch    @relation(fields: [branchId], references: [id])
-  branchId      Int
+  branchId      String
   days          Int
   date          DateTime
   totalExpenses Int
@@ -157,22 +159,22 @@ model TotalExpensesPerDay {
 }
 
 model Transaction {
-  id              Int      @id @default(autoincrement())
+  id              String   @id @default(uuid())
   order           Order    @relation(fields: [orderId], references: [id])
-  orderId         Int
+  orderId         String
   branch          Branch   @relation(fields: [branchId], references: [id])
-  branchId        Int
+  branchId        String
   paymentMethod   String
   amountPaid      Int
   transactionDate DateTime @default(now())
 }
 
 model User {
-  id        Int     @id @default(autoincrement())
+  id        String  @id @default(uuid())
   role      Role    @relation(fields: [roleId], references: [id])
-  roleId    Int
+  roleId    String
   branch    Branch  @relation(fields: [branchId], references: [id])
-  branchId  Int
+  branchId  String
   firstname String
   lastname  String
   cpNum     String
@@ -184,9 +186,9 @@ model User {
 // Less prio table
 
 model Batch {
-  id                  Int       @id @default(autoincrement())
+  id                  String    @id @default(uuid())
   inventory           Inventory @relation(fields: [inventoryId], references: [id])
-  inventoryId         Int
+  inventoryId         String
   batchQuantity       Int
   expirationDate      DateTime
   recievedDate        DateTime
@@ -197,9 +199,9 @@ model Batch {
 }
 
 model SystemNotification {
-  id               Int       @id @default(autoincrement())
+  id               String    @id @default(uuid())
   inventory        Inventory @relation(fields: [inventoryId], references: [id])
-  inventoryId      Int
+  inventoryId      String
   notificationDate DateTime
   stauts           String
   isSolved         Boolean

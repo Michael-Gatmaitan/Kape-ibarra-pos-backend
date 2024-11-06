@@ -44,7 +44,7 @@ export const createOrder = async (req: Request, res: Response) => {
     const productPriceMap = products.reduce((acc, product) => {
       acc[product.id] = product.price;
       return acc;
-    }, {} as Record<number, number>);
+    }, {} as Record<string, number>);
 
     console.log(productPriceMap);
 

@@ -10,6 +10,7 @@ import categoryRoute from "./routes/categoryRoutes";
 import branchRoute from "./routes/branchRoutes";
 import roleRoute from "./routes/roleRoutes";
 import rawMaterialRoute from "./routes/rawMaterialRoutes";
+import recipeRoute from "./routes/recipeRoutes";
 
 import prisma from "./config/db";
 import { generateToken } from "./auth/jwt";
@@ -17,6 +18,7 @@ import { generateToken } from "./auth/jwt";
 
 import { Server } from "socket.io";
 import { createServer } from "http";
+import { ICreateUserBody } from "./types/types";
 
 const app: Application = express();
 
@@ -39,43 +41,104 @@ app.use("/category", categoryRoute);
 app.use("/order", orderRoute);
 app.use("/role", roleRoute);
 app.use("/rawMaterial", rawMaterialRoute);
+app.use("/recipe", recipeRoute);
 
-// app.use("/user", userRouter);
+(async function () {
+  const role = await prisma.role.findFirst({
+    where: {
+      roleName: { in: ["Branch Admin", "Cashier", "Barista"] },
+    },
+  });
 
-// Setup initial db
+  if (!role?.id) {
+    await prisma.role.createMany({
+      data: [
+        { roleName: "Branch Admin" },
+        { roleName: "Cashier" },
+        { roleName: "Barista" },
+      ],
+    });
 
-// Middleware
-// app.use((err, req, res, next) => {
-//   console.error(err.stack);
-//   res.status(500).send("Something broke!");
-//   next(err);
-// })
+    console.log("Roles created");
+  }
 
-// Initialize roles
+  const branch = await prisma.branch.findFirst();
 
-// app.use("/", async (_: Request, res: Response) => {
-//   res.send(await prisma.role.findMany());
-// });
+  if (!branch?.id) {
+    await prisma.branch.create({
+      data: {
+        streetAddress: "Avocado St.",
+        baranggay: "Sta. Rosa I",
+        city: "Marilao",
+        zipCode: 3019,
+        province: "Bulacan",
+        contactNumber: "09123456789",
+        region: "Region III",
 
-// app.get("/profile", verifyToken, (req, res) => {});
+        users: {
+          create: {
+            firstname: "Michael",
+            lastname: "Gatmaitan",
+            username: "mikael",
+            password: "michealgatmaitan",
+            cpNum: "09499693314",
 
-// io.on("connection", () => console.log("A user connected"));
+            role: {
+              create: {
+                roleName: "System Admin",
+              },
+            },
+          },
+        },
+      },
+    });
 
-// app.post("/product/categories/add", async (req, res) => {
-//   const { categoryName }: { categoryName: string } = req.body;
+    console.log("Branch with user & role created");
+  }
 
-//   console.log("afdlkasdflk jal; ");
+  const product = await prisma.product.findFirst();
 
-//   const newCategory = await prisma.category.create({
-//     data: {
-//       categoryName,
-//     },
-//   });
+  if (!product?.id) {
+    await prisma.product.create({
+      data: {
+        productName: "Cafe latte",
+        description: "Sample description",
+        price: 90,
+        category: {
+          create: {
+            categoryName: "Coffee",
+          },
+        },
+      },
+    });
 
-//   io.emit("newCategory", newCategory);
+    console.log("Product created");
+  }
 
-//   res.json({ newCategory });
-// });
+  const rawMaterials = await prisma.rawMaterial.findFirst();
+  if (!rawMaterials?.id) {
+    await prisma.rawMaterial.createMany({
+      data: [
+        { materialName: "Milk", quantityInUnitPerItem: 1000, rawPrice: 100 },
+        {
+          materialName: "Coffee grounds",
+          quantityInUnitPerItem: 1000,
+          rawPrice: 800,
+        },
+        {
+          materialName: "Whip Cream",
+          quantityInUnitPerItem: 1000,
+          rawPrice: 120,
+        },
+        { materialName: "Cups", quantityInUnitPerItem: 50, rawPrice: 50 },
+        { materialName: "Straw", quantityInUnitPerItem: 50, rawPrice: 50 },
+        { materialName: "Water", quantityInUnitPerItem: 5000, rawPrice: 30 },
+      ],
+    });
+
+    console.log("Raw materials created");
+  }
+})();
 
 app.post("/login", async (req: Request, res: Response) => {
   const body: { username: string; password: string } = req.body;
@@ -98,9 +161,7 @@ app.post("/login", async (req: Request, res: Response) => {
 });
 
 app.post("/signup", async (req: Request, res: Response) => {
-  const body = req.body;
-  body.roleId = parseInt(body.roleId);
-  body.branchId = parseInt(body.branchId);
+  const body: ICreateUserBody = req.body;
 
   const newUser = await prisma.user.create({
     data: body,
