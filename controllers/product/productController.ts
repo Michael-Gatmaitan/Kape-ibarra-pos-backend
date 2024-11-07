@@ -136,8 +136,6 @@ export const createProduct = async (req: Request, res: Response) => {
 };
 
 export const getProductById = async (req: Request, res: Response) => {
-  console.log(req.params.id);
-
   const { id } = req.params;
 
   // Get product's recipe information
@@ -174,14 +172,15 @@ export const deleteProductById = async (req: Request, res: Response) => {
     });
 
     if (!deletedProduct?.id) {
-      res.json({ error: "Product not extists " }).status(400);
+      res.json({ error: "Product not extists" }).status(403);
+      return;
     }
 
-    console.log(deletedProduct);
+    console.log("Deleted product: ", deletedProduct);
     res.json(deletedProduct);
     return;
   } catch (err) {
-    res.status(401).json({ error: "Error has occured in deleting product" });
+    res.status(403).json({ error: "Error has occured in deleting product" });
     return;
   }
 };

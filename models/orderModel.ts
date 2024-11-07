@@ -12,17 +12,17 @@ export const getOrderItems = async () => {
   return await prisma.orderItem.findMany();
 };
 
-export const getOrderItemsById = async (id: number) => {
+export const getOrderItemsById = async (id: string) => {
   return await prisma.orderItem.findFirst({ where: { id } });
 };
 
 // Delete
-export const deleteOrderItem = async (id: number) => {
+export const deleteOrderItem = async (id: string) => {
   return await prisma.orderItem.delete({ where: { id } });
 };
 
 export const updateOrderItem = async (
-  id: number,
+  id: string,
   orderItemBody: IUpdateOrderItemBody
 ) => {
   return await prisma.orderItem.update({ where: { id }, data: orderItemBody });
@@ -43,7 +43,7 @@ export const updateOrderItem = async (
 // };
 
 export const updateOrder = async (
-  id: number,
+  id: string,
   data: Prisma.OrderUpdateInput
 ) => {
   return await prisma.order.update({ where: { id }, data });

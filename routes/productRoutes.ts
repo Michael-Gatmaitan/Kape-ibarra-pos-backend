@@ -11,7 +11,7 @@ import { verifyToken } from "../auth/jwt";
 const router: Router = express.Router();
 
 router.get("/", getOrders);
-router.post("/", verifyToken, createProduct);
+router.post("/", createProduct);
 // router.put("/", updateOrder);
 // router.delete("/", deleteOrder);
 
