@@ -6,11 +6,12 @@ import {
   getProductById,
   updateProductById,
 } from "../controllers/product/productController";
+import { verifyToken } from "../auth/jwt";
 
 const router: Router = express.Router();
 
 router.get("/", getOrders);
-router.post("/", createProduct);
+router.post("/", verifyToken, createProduct);
 // router.put("/", updateOrder);
 // router.delete("/", deleteOrder);
 

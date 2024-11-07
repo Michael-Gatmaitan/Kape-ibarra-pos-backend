@@ -1,6 +1,7 @@
-import express, { Application, Request, Response } from "express";
+import express, { Application, NextFunction, Request, Response } from "express";
 import cors from "cors";
 import dotenv from "dotenv";
+import cookieParser from "cookie-parser";
 
 // Routes
 import userRoute from "./routes/userRoutes";
@@ -13,7 +14,7 @@ import rawMaterialRoute from "./routes/rawMaterialRoutes";
 import recipeRoute from "./routes/recipeRoutes";
 
 import prisma from "./config/db";
-import { generateToken } from "./auth/jwt";
+import { generateToken, verifyToken } from "./auth/jwt";
 // import { generateToken } from "./auth/jwt";
 
 import { Server } from "socket.io";
@@ -29,6 +30,7 @@ io.on("connection", (socket) => console.log("Connected: ", socket.id));
 
 app.use(express.json());
 app.use(cors());
+app.use(cookieParser());
 
 dotenv.config();
 
@@ -155,9 +157,8 @@ app.post("/login", async (req: Request, res: Response) => {
     return;
   }
 
-  const generated = await generateToken(user);
-
-  res.json({ token: generated });
+  const token = await generateToken(user);
+  res.json({ token });
 });
 
 app.post("/signup", async (req: Request, res: Response) => {

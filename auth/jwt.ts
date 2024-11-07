@@ -10,7 +10,7 @@ export const generateToken = async (user: IUser) => {
     await prisma.role.findFirstOrThrow({ where: { id: user.roleId } })
   ).roleName;
 
-  return jwt.sign({ id: user.id, roleName }, SECRET_KEY);
+  return jwt.sign({ user, roleName }, SECRET_KEY);
 };
 
 export const verifyToken = (
@@ -27,6 +27,8 @@ export const verifyToken = (
 
   jwt.verify(token, SECRET_KEY, (error, decoded) => {
     if (error) res.status(403).json({ error: "Invalid  token" });
+
+    console.log("Validated");
     next();
   });
 };

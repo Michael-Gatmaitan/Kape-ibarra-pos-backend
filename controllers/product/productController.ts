@@ -1,9 +1,5 @@
-import { Prisma } from "@prisma/client";
-// import { createProductWithCategory } from "../../models/productModel";
-import { Request, Response } from "express";
 import prisma from "../../config/db";
-import { ICreateProductBody, ICreateRecipeBody } from "../../types/types";
-import { pid } from "process";
+import { Request, Response } from "express";
 import { randomUUID } from "crypto";
 
 /**
@@ -18,15 +14,6 @@ interface IProductBody {
   description?: string;
   categoryId: string;
 }
-
-// interface IRecipeBody {
-//   quantityInUnitNeeded: string;
-//   rawMaterialId: string;
-// }
-// interface ICreateProductJSONBody {
-//   productBody: ICreateProductBody;
-//   recipeBody: Prisma.RecipeCreateManyInput;
-// }
 
 export const getOrders = async (req: Request, res: Response) => {
   const products = await prisma.product.findMany();
@@ -60,14 +47,6 @@ export const updateProductById = async (req: Request, res: Response) => {
       ),
     };
   });
-
-  // Able to ADD new recipes
-
-  console.log("Current recipes in api: ", recipeBody);
-
-  // Able to delete removed existing RECIPES
-
-  console.log(recipeBody);
 
   try {
     const updatedProduct = await prisma.product.update({
@@ -189,14 +168,20 @@ export const getProductById = async (req: Request, res: Response) => {
 export const deleteProductById = async (req: Request, res: Response) => {
   const { id } = req.params;
 
-  const deletedProduct = await prisma.product.delete({
-    where: { id },
-  });
+  try {
+    const deletedProduct = await prisma.product.delete({
+      where: { id },
+    });
 
-  if (!deletedProduct?.id) {
-    res.json({ error: "Product not extists " }).status(400);
+    if (!deletedProduct?.id) {
+      res.json({ error: "Product not extists " }).status(400);
+    }
+
+    console.log(deletedProduct);
+    res.json(deletedProduct);
+    return;
+  } catch (err) {
+    res.status(401).json({ error: "Error has occured in deleting product" });
+    return;
   }
-
-  console.log(deletedProduct);
-  res.json(deletedProduct);
 };
