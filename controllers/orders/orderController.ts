@@ -12,7 +12,7 @@ interface ICreateOrderSelf {
 /**
  *
  * @param orderBody
- *        { branchId, userId }
+ *        { userId }
  * @param orderItemsBody
  *        [{
  *          productId
@@ -24,7 +24,6 @@ interface ICreateOrderSelf {
  *        {
  *          amountPaid
  *          paymentMethod
- *          branchId
  *        }
  *
  */
@@ -32,7 +31,7 @@ interface ICreateOrderSelf {
 export const createOrder = async (req: Request, res: Response) => {
   const { orderBody, orderItemsBody, transactionBody }: ICreateOrderSelf =
     req.body;
-  const { branchId, userId } = orderBody;
+  const { userId } = orderBody;
 
   const result = await prisma.$transaction(async (prisma) => {
     const productIds = orderItemsBody.map((item) => item.productId);
@@ -41,10 +40,13 @@ export const createOrder = async (req: Request, res: Response) => {
       select: { id: true, price: true },
     });
 
-    const productPriceMap = products.reduce((acc, product) => {
-      acc[product.id] = product.price;
-      return acc;
-    }, {} as Record<string, number>);
+    const productPriceMap = products.reduce(
+      (acc, product) => {
+        acc[product.id] = product.price;
+        return acc;
+      },
+      {} as Record<string, number>,
+    );
 
     console.log(productPriceMap);
 
@@ -53,10 +55,17 @@ export const createOrder = async (req: Request, res: Response) => {
       quantityAmount: item.quantity * (productPriceMap[item.productId] || 0),
     }));
 
+    let orderTotalPrice = 0;
+    updatedOrderItemsBody.map((orderItem) => {
+      orderTotalPrice += orderItem.quantityAmount;
+    });
+
+    console.log(updatedOrderItemsBody, orderTotalPrice);
+
     const newOrder = await prisma.order.create({
       data: {
-        branchId,
         userId,
+        totalPrice: orderTotalPrice,
 
         orderItems: {
           createMany: {

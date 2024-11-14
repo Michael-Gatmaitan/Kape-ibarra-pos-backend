@@ -37,25 +37,26 @@ dotenv.config();
 const PORT = process.env.PORT || 9999;
 
 app.use("/user", userRoute);
-app.use("/branch", branchRoute);
+// app.use("/branch", branchRoute);
 app.use("/product", productRoute);
 app.use("/category", categoryRoute);
 app.use("/order", orderRoute);
 app.use("/role", roleRoute);
-app.use("/rawMaterial", rawMaterialRoute);
+app.use("/raw-material", rawMaterialRoute);
 app.use("/recipe", recipeRoute);
 
 (async function () {
   const role = await prisma.role.findFirst({
     where: {
-      roleName: { in: ["Branch Admin", "Cashier", "Barista"] },
+      roleName: { in: ["Admin", "Manager", "Cashier", "Barista"] },
     },
   });
 
   if (!role?.id) {
     await prisma.role.createMany({
       data: [
-        { roleName: "Branch Admin" },
+        { roleName: "Admin" },
+        { roleName: "Manager" },
         { roleName: "Cashier" },
         { roleName: "Barista" },
       ],
@@ -64,38 +65,54 @@ app.use("/recipe", recipeRoute);
     console.log("Roles created");
   }
 
-  const branch = await prisma.branch.findFirst();
+  // const branch = await prisma.branch.findFirst();
+  //
+  // if (!branch?.id) {
+  //   await prisma.branch.create({
+  //     data: {
+  //       streetAddress: "Avocado St.",
+  //       baranggay: "Sta. Rosa I",
+  //       city: "Marilao",
+  //       zipCode: 3019,
+  //       province: "Bulacan",
+  //       contactNumber: "09123456789",
+  //       region: "Region III",
+  //
+  //       users: {
+  //         create: {
+  //           firstname: "Michael",
+  //           lastname: "Gatmaitan",
+  //           username: "mikael",
+  //           password: "michealgatmaitan",
+  //           cpNum: "09499693314",
+  //
+  //           role: {
+  //             create: {
+  //               roleName: "System Admin",
+  //             },
+  //           },
+  //         },
+  //       },
+  //     },
+  //   });
+  //
+  //   console.log("Branch with user & role created");
+  // }
 
-  if (!branch?.id) {
-    await prisma.branch.create({
+  const user = await prisma.user.findFirst();
+
+  if (!user?.id) {
+    await prisma.user.create({
       data: {
-        streetAddress: "Avocado St.",
-        baranggay: "Sta. Rosa I",
-        city: "Marilao",
-        zipCode: 3019,
-        province: "Bulacan",
-        contactNumber: "09123456789",
-        region: "Region III",
-
-        users: {
-          create: {
-            firstname: "Michael",
-            lastname: "Gatmaitan",
-            username: "mikael",
-            password: "michealgatmaitan",
-            cpNum: "09499693314",
-
-            role: {
-              create: {
-                roleName: "System Admin",
-              },
-            },
-          },
-        },
+        firstname: "Michael",
+        lastname: "Gatmaitan",
+        password: "michealgatmaitan",
+        username: "micheal29",
+        cpNum: "09499693314",
+        roleId: "090909",
+        imagePath: "",
       },
     });
-
-    console.log("Branch with user & role created");
   }
 
   const product = await prisma.product.findFirst();

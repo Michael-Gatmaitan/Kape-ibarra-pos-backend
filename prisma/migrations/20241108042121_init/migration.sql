@@ -1,3 +1,4 @@
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
 -- CreateTable
 CREATE TABLE "Branch" (
     "id" UUID NOT NULL DEFAULT gen_random_uuid(),
@@ -9,8 +10,8 @@ CREATE TABLE "Branch" (
     "region" TEXT NOT NULL,
     "contactNumber" TEXT NOT NULL,
 
-    CONSTRAINT "Branch_pkey" PRIMARY KEY ("id")
-);
+
+CONSTRAINT "Branch_pkey" PRIMARY KEY ("id") );
 
 -- CreateTable
 CREATE TABLE "Expense" (
@@ -19,8 +20,8 @@ CREATE TABLE "Expense" (
     "expenseAmount" INTEGER NOT NULL,
     "descriptionOfExpense" TEXT NOT NULL,
 
-    CONSTRAINT "Expense_pkey" PRIMARY KEY ("id")
-);
+
+CONSTRAINT "Expense_pkey" PRIMARY KEY ("id") );
 
 -- CreateTable
 CREATE TABLE "Inventory" (
@@ -31,8 +32,8 @@ CREATE TABLE "Inventory" (
     "stockQuantity" INTEGER NOT NULL,
     "isReorderNeeded" BOOLEAN NOT NULL,
 
-    CONSTRAINT "Inventory_pkey" PRIMARY KEY ("id")
-);
+
+CONSTRAINT "Inventory_pkey" PRIMARY KEY ("id") );
 
 -- CreateTable
 CREATE TABLE "Order" (
@@ -44,8 +45,8 @@ CREATE TABLE "Order" (
     "totalPrice" INTEGER NOT NULL DEFAULT 0,
     "orderStatus" BOOLEAN NOT NULL DEFAULT false,
 
-    CONSTRAINT "Order_pkey" PRIMARY KEY ("id")
-);
+
+CONSTRAINT "Order_pkey" PRIMARY KEY ("id") );
 
 -- CreateTable
 CREATE TABLE "OrderItem" (
@@ -55,16 +56,16 @@ CREATE TABLE "OrderItem" (
     "quantity" INTEGER NOT NULL,
     "quantityAmount" INTEGER NOT NULL,
 
-    CONSTRAINT "OrderItem_pkey" PRIMARY KEY ("id")
-);
+
+CONSTRAINT "OrderItem_pkey" PRIMARY KEY ("id") );
 
 -- CreateTable
 CREATE TABLE "Category" (
     "id" UUID NOT NULL DEFAULT gen_random_uuid(),
     "categoryName" TEXT NOT NULL,
 
-    CONSTRAINT "Category_pkey" PRIMARY KEY ("id")
-);
+
+CONSTRAINT "Category_pkey" PRIMARY KEY ("id") );
 
 -- CreateTable
 CREATE TABLE "Product" (
@@ -75,8 +76,8 @@ CREATE TABLE "Product" (
     "description" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-    CONSTRAINT "Product_pkey" PRIMARY KEY ("id")
-);
+
+CONSTRAINT "Product_pkey" PRIMARY KEY ("id") );
 
 -- CreateTable
 CREATE TABLE "Profit" (
@@ -88,8 +89,8 @@ CREATE TABLE "Profit" (
     "dailySales" INTEGER NOT NULL,
     "dailyProfit" INTEGER NOT NULL,
 
-    CONSTRAINT "Profit_pkey" PRIMARY KEY ("id")
-);
+
+CONSTRAINT "Profit_pkey" PRIMARY KEY ("id") );
 
 -- CreateTable
 CREATE TABLE "RawMaterial" (
@@ -98,8 +99,8 @@ CREATE TABLE "RawMaterial" (
     "quantityInUnitPerItem" INTEGER NOT NULL,
     "rawPrice" INTEGER NOT NULL,
 
-    CONSTRAINT "RawMaterial_pkey" PRIMARY KEY ("id")
-);
+
+CONSTRAINT "RawMaterial_pkey" PRIMARY KEY ("id") );
 
 -- CreateTable
 CREATE TABLE "Recipe" (
@@ -109,16 +110,16 @@ CREATE TABLE "Recipe" (
     "quantityInUnitPcsNeeded" INTEGER NOT NULL,
     "rawCost" INTEGER NOT NULL DEFAULT 0,
 
-    CONSTRAINT "Recipe_pkey" PRIMARY KEY ("id")
-);
+
+CONSTRAINT "Recipe_pkey" PRIMARY KEY ("id") );
 
 -- CreateTable
 CREATE TABLE "Role" (
     "id" UUID NOT NULL DEFAULT gen_random_uuid(),
     "roleName" TEXT NOT NULL,
 
-    CONSTRAINT "Role_pkey" PRIMARY KEY ("id")
-);
+
+CONSTRAINT "Role_pkey" PRIMARY KEY ("id") );
 
 -- CreateTable
 CREATE TABLE "TotalExpensesPerDay" (
@@ -128,8 +129,8 @@ CREATE TABLE "TotalExpensesPerDay" (
     "date" TIMESTAMP(3) NOT NULL,
     "totalExpenses" INTEGER NOT NULL,
 
-    CONSTRAINT "TotalExpensesPerDay_pkey" PRIMARY KEY ("id")
-);
+
+CONSTRAINT "TotalExpensesPerDay_pkey" PRIMARY KEY ("id") );
 
 -- CreateTable
 CREATE TABLE "Transaction" (
@@ -140,8 +141,8 @@ CREATE TABLE "Transaction" (
     "amountPaid" INTEGER NOT NULL,
     "transactionDate" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-    CONSTRAINT "Transaction_pkey" PRIMARY KEY ("id")
-);
+
+CONSTRAINT "Transaction_pkey" PRIMARY KEY ("id") );
 
 -- CreateTable
 CREATE TABLE "User" (
@@ -154,8 +155,8 @@ CREATE TABLE "User" (
     "username" TEXT NOT NULL,
     "password" TEXT NOT NULL,
 
-    CONSTRAINT "User_pkey" PRIMARY KEY ("id")
-);
+
+CONSTRAINT "User_pkey" PRIMARY KEY ("id") );
 
 -- CreateTable
 CREATE TABLE "Batch" (
@@ -169,8 +170,8 @@ CREATE TABLE "Batch" (
     "isExpired" BOOLEAN NOT NULL,
     "isDisposed" BOOLEAN NOT NULL,
 
-    CONSTRAINT "Batch_pkey" PRIMARY KEY ("id")
-);
+
+CONSTRAINT "Batch_pkey" PRIMARY KEY ("id") );
 
 -- CreateTable
 CREATE TABLE "SystemNotification" (
@@ -180,65 +181,87 @@ CREATE TABLE "SystemNotification" (
     "stauts" TEXT NOT NULL,
     "isSolved" BOOLEAN NOT NULL,
 
-    CONSTRAINT "SystemNotification_pkey" PRIMARY KEY ("id")
-);
+
+CONSTRAINT "SystemNotification_pkey" PRIMARY KEY ("id") );
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Branch_streetAddress_key" ON "Branch"("streetAddress");
+CREATE UNIQUE INDEX "Branch_streetAddress_key" ON "Branch" ("streetAddress");
 
 -- AddForeignKey
-ALTER TABLE "Expense" ADD CONSTRAINT "Expense_totalExpensesPerDayId_fkey" FOREIGN KEY ("totalExpensesPerDayId") REFERENCES "TotalExpensesPerDay"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Expense"
+ADD CONSTRAINT "Expense_totalExpensesPerDayId_fkey" FOREIGN KEY ("totalExpensesPerDayId") REFERENCES "TotalExpensesPerDay" ("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Inventory" ADD CONSTRAINT "Inventory_branchId_fkey" FOREIGN KEY ("branchId") REFERENCES "Branch"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Inventory"
+ADD CONSTRAINT "Inventory_branchId_fkey" FOREIGN KEY ("branchId") REFERENCES "Branch" ("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Inventory" ADD CONSTRAINT "Inventory_rawMaterialId_fkey" FOREIGN KEY ("rawMaterialId") REFERENCES "RawMaterial"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Inventory"
+ADD CONSTRAINT "Inventory_rawMaterialId_fkey" FOREIGN KEY ("rawMaterialId") REFERENCES "RawMaterial" ("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Order" ADD CONSTRAINT "Order_branchId_fkey" FOREIGN KEY ("branchId") REFERENCES "Branch"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Order"
+ADD CONSTRAINT "Order_branchId_fkey" FOREIGN KEY ("branchId") REFERENCES "Branch" ("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Order" ADD CONSTRAINT "Order_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Order"
+ADD CONSTRAINT "Order_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User" ("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "OrderItem" ADD CONSTRAINT "OrderItem_orderId_fkey" FOREIGN KEY ("orderId") REFERENCES "Order"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "OrderItem"
+ADD CONSTRAINT "OrderItem_orderId_fkey" FOREIGN KEY ("orderId") REFERENCES "Order" ("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "OrderItem" ADD CONSTRAINT "OrderItem_productId_fkey" FOREIGN KEY ("productId") REFERENCES "Product"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "OrderItem"
+ADD CONSTRAINT "OrderItem_productId_fkey" FOREIGN KEY ("productId") REFERENCES "Product" ("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Product" ADD CONSTRAINT "Product_categoryId_fkey" FOREIGN KEY ("categoryId") REFERENCES "Category"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Product"
+ADD CONSTRAINT "Product_categoryId_fkey" FOREIGN KEY ("categoryId") REFERENCES "Category" ("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Profit" ADD CONSTRAINT "Profit_totalExpensesPerDayId_fkey" FOREIGN KEY ("totalExpensesPerDayId") REFERENCES "TotalExpensesPerDay"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Profit"
+ADD CONSTRAINT "Profit_totalExpensesPerDayId_fkey" FOREIGN KEY ("totalExpensesPerDayId") REFERENCES "TotalExpensesPerDay" ("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Profit" ADD CONSTRAINT "Profit_branchId_fkey" FOREIGN KEY ("branchId") REFERENCES "Branch"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Profit"
+ADD CONSTRAINT "Profit_branchId_fkey" FOREIGN KEY ("branchId") REFERENCES "Branch" ("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Recipe" ADD CONSTRAINT "Recipe_productId_fkey" FOREIGN KEY ("productId") REFERENCES "Product"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "Recipe"
+ADD CONSTRAINT "Recipe_productId_fkey" FOREIGN KEY ("productId") REFERENCES "Product" ("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Recipe" ADD CONSTRAINT "Recipe_rawMaterialId_fkey" FOREIGN KEY ("rawMaterialId") REFERENCES "RawMaterial"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Recipe"
+ADD CONSTRAINT "Recipe_rawMaterialId_fkey" FOREIGN KEY ("rawMaterialId") REFERENCES "RawMaterial" ("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "TotalExpensesPerDay" ADD CONSTRAINT "TotalExpensesPerDay_branchId_fkey" FOREIGN KEY ("branchId") REFERENCES "Branch"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "TotalExpensesPerDay"
+ADD CONSTRAINT "TotalExpensesPerDay_branchId_fkey" FOREIGN KEY ("branchId") REFERENCES "Branch" ("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Transaction" ADD CONSTRAINT "Transaction_orderId_fkey" FOREIGN KEY ("orderId") REFERENCES "Order"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Transaction"
+ADD CONSTRAINT "Transaction_orderId_fkey" FOREIGN KEY ("orderId") REFERENCES "Order" ("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Transaction" ADD CONSTRAINT "Transaction_branchId_fkey" FOREIGN KEY ("branchId") REFERENCES "Branch"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Transaction"
+ADD CONSTRAINT "Transaction_branchId_fkey" FOREIGN KEY ("branchId") REFERENCES "Branch" ("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "User" ADD CONSTRAINT "User_roleId_fkey" FOREIGN KEY ("roleId") REFERENCES "Role"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "User"
+ADD CONSTRAINT "User_roleId_fkey" FOREIGN KEY ("roleId") REFERENCES "Role" ("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "User" ADD CONSTRAINT "User_branchId_fkey" FOREIGN KEY ("branchId") REFERENCES "Branch"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "User"
+ADD CONSTRAINT "User_branchId_fkey" FOREIGN KEY ("branchId") REFERENCES "Branch" ("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Batch" ADD CONSTRAINT "Batch_inventoryId_fkey" FOREIGN KEY ("inventoryId") REFERENCES "Inventory"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Batch"
+ADD CONSTRAINT "Batch_inventoryId_fkey" FOREIGN KEY ("inventoryId") REFERENCES "Inventory" ("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "SystemNotification" ADD CONSTRAINT "SystemNotification_inventoryId_fkey" FOREIGN KEY ("inventoryId") REFERENCES "Inventory"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "SystemNotification"
+ADD CONSTRAINT "SystemNotification_inventoryId_fkey" FOREIGN KEY ("inventoryId") REFERENCES "Inventory" ("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- ADD COLUMN "id" UUID NOT NULL DEFAULT gen_random_uuid (),
+-- ADD PRIMARY KEY ("id");

@@ -1,13 +1,13 @@
 import { Prisma } from "@prisma/client";
 import prisma from "../config/db";
 
-export interface IBranch {
-  id: string;
-  streetAddress: string;
-  baranggay: string;
-  city: string;
-  zipCode: number;
-}
+// export interface IBranch {
+//   id: string;
+//   streetAddress: string;
+//   baranggay: string;
+//   city: string;
+//   zipCode: number;
+// }
 
 export interface IExpense {
   id: string;
@@ -17,7 +17,7 @@ export interface IExpense {
 
 export interface IInventory {
   id: string;
-  branchId: string;
+  // branchId: string;
   rawMaterialId: string;
   quantityInUnit: number;
   stockQuantity: number;
@@ -27,7 +27,7 @@ export interface IInventory {
 export interface IOrder {
   id: string;
   orderedAt: string;
-  branchId: string;
+  // branchId: string;
   userId: string;
   customerId: string;
   userNumber: string;
@@ -35,7 +35,7 @@ export interface IOrder {
   orderStatus: boolean;
 }
 
-export type OrderCreate = Pick<IOrder, "branchId" | "userId">;
+// export type OrderCreate = Pick<IOrder, "branchId" | "userId">;
 
 export interface IOrderItem {
   id: string;
@@ -54,7 +54,9 @@ export interface ICategory {
 
 export interface IProduct {
   id: string;
+  imagePath: string;
   catergoryId: string;
+  // -- PLU0
   productName: string;
   price: number;
   description?: string;
@@ -89,7 +91,7 @@ export interface IRole {
 }
 export interface ITotalExpensesPerDay {
   id: string;
-  branchId: string;
+  // branchId: string;
   days: number;
   date: string;
   totalExpenses: number;
@@ -97,14 +99,14 @@ export interface ITotalExpensesPerDay {
 export interface ITransaction {
   id: string;
   orderId: string;
-  branchId: string;
+  // branchId: string;
   paymentMethod: string;
   amountPaid: string;
 }
 export interface IUser {
   id: string;
   roleId: string;
-  branchId: string;
+  // branchId: string;
   firstname: string;
   lastname: string;
   cpNum: string;
@@ -130,7 +132,7 @@ export interface ISystemNotification {
   isSolved: boolean;
 }
 
-export type ICreateBranchBody = Prisma.BranchUncheckedCreateInput;
+// export type ICreateBranchBody = Prisma.BranchUncheckedCreateInput;
 
 export type ICreateProductBody = Prisma.ProductUncheckedCreateInput;
 
@@ -147,6 +149,8 @@ export type ICreateRecipeBody = Prisma.RecipeUncheckedCreateInput;
 export type ICreateRoleBody = Prisma.RoleUncheckedCreateInput;
 
 export type ICreateUserBody = Prisma.UserUncheckedCreateInput;
+
+export type ICreateRawMaterialBody = Prisma.RawMaterialUncheckedCreateInput;
 
 // Update
 

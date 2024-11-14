@@ -13,9 +13,23 @@ interface IProductBody {
   price: number;
   description?: string;
   categoryId: string;
+  imagePath: string;
 }
 
-export const getOrders = async (req: Request, res: Response) => {
+export const getProducts = async (req: Request, res: Response) => {
+  const categoryParam = req.query.category;
+
+  if (categoryParam === "true") {
+    const products = await prisma.product.findMany({
+      include: {
+        category: true,
+      },
+    });
+
+    res.json(products);
+    return;
+  }
+
   const products = await prisma.product.findMany();
 
   res.json(products);
@@ -34,9 +48,15 @@ export const updateProductById = async (req: Request, res: Response) => {
     }[];
   } = req.body;
 
+  // if (productBody.imagePath === "") [
+
+  // ]
+
   const id = req.params.id as string;
 
   productBody.price = parseInt(productBody.price.toString());
+
+  console.log(productBody);
 
   recipeBody = recipeBody.map((recipe) => {
     return {
@@ -49,6 +69,9 @@ export const updateProductById = async (req: Request, res: Response) => {
   });
 
   try {
+    const currentProductImagePath = (
+      await prisma.product.findFirst({ where: { id } })
+    )?.imagePath;
     const updatedProduct = await prisma.product.update({
       where: { id },
       data: {
@@ -56,6 +79,10 @@ export const updateProductById = async (req: Request, res: Response) => {
         productName: productBody.productName,
         description: productBody.description,
         categoryId: productBody.categoryId,
+        imagePath:
+          productBody.imagePath === ""
+            ? currentProductImagePath
+            : productBody.imagePath,
         price: productBody.price,
         recipes: {
           upsert: recipeBody.map((recipe) => ({
@@ -105,12 +132,12 @@ export const createProduct = async (req: Request, res: Response) => {
 
   recipeBody = recipeBody.map(
     (recipe: {
-      id: string;
+      // id: string;
       rawMaterialId: string;
       quantityInUnitPcsNeeded: string;
     }) => {
       return {
-        id: recipe.id,
+        // id: recipe.id,
         rawMaterialId: recipe.rawMaterialId,
         quantityInUnitPcsNeeded: parseInt(recipe.quantityInUnitPcsNeeded),
       };

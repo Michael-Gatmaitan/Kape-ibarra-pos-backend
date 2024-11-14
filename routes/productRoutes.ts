@@ -2,15 +2,15 @@ import express, { Router } from "express";
 import {
   createProduct,
   deleteProductById,
-  getOrders,
+  getProducts,
   getProductById,
   updateProductById,
 } from "../controllers/product/productController";
-import { verifyToken } from "../auth/jwt";
+// import { verifyToken } from "../auth/jwt";
 
 const router: Router = express.Router();
 
-router.get("/", getOrders);
+router.get("/", getProducts);
 router.post("/", createProduct);
 // router.put("/", updateOrder);
 // router.delete("/", deleteOrder);
