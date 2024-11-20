@@ -15,32 +15,145 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const cors_1 = __importDefault(require("cors"));
 const dotenv_1 = __importDefault(require("dotenv"));
-const client_1 = require("@prisma/client");
-// import orderRoute from "./routes/orderRoutes";
-// import userRouter from "./controllers/user/user";
-// import { IUser } from "./types/types";
+const cookie_parser_1 = __importDefault(require("cookie-parser"));
+// Routes
+const orderRoutes_1 = __importDefault(require("./routes/orderRoutes"));
+const productRoutes_1 = __importDefault(require("./routes/productRoutes"));
+const categoryRoutes_1 = __importDefault(require("./routes/categoryRoutes"));
+const roleRoutes_1 = __importDefault(require("./routes/roleRoutes"));
+const rawMaterialRoutes_1 = __importDefault(require("./routes/rawMaterialRoutes"));
+const recipeRoutes_1 = __importDefault(require("./routes/recipeRoutes"));
+const userRoutes_1 = __importDefault(require("./routes/userRoutes"));
+const db_1 = __importDefault(require("./config/db"));
 const jwt_1 = require("./auth/jwt");
+// import { generateToken } from "./auth/jwt";
+const socket_io_1 = require("socket.io");
+const http_1 = require("http");
 const app = (0, express_1.default)();
-const prisma = new client_1.PrismaClient();
+const server = (0, http_1.createServer)(app);
+const io = new socket_io_1.Server(server);
+io.on("connection", (socket) => console.log("Connected: ", socket.id));
 app.use(express_1.default.json());
 app.use((0, cors_1.default)());
+app.use((0, cookie_parser_1.default)());
 dotenv_1.default.config();
 const PORT = process.env.PORT || 9999;
-// app.use("/order", orderRoute);
-// app.use("/user", userRouter);
-// Setup initial db
-// Middleware
-// app.use((err, req, res, next) => {
-//   console.error(err.stack);
-//   res.status(500).send("Something broke!");
-//   next(err);
-// })
-app.use("/", (_, res) => {
-    res.send("hgotdog ni michael");
-});
+app.use("/user", userRoutes_1.default);
+app.use("/product", productRoutes_1.default);
+app.use("/category", categoryRoutes_1.default);
+app.use("/order", orderRoutes_1.default);
+app.use("/role", roleRoutes_1.default);
+app.use("/raw-material", rawMaterialRoutes_1.default);
+app.use("/recipe", recipeRoutes_1.default);
+app.use("/user", userRoutes_1.default);
+(function () {
+    return __awaiter(this, void 0, void 0, function* () {
+        const role = yield db_1.default.role.findFirst({
+            where: {
+                roleName: { in: ["Admin", "Manager", "Cashier", "Barista"] },
+            },
+        });
+        if (!(role === null || role === void 0 ? void 0 : role.id)) {
+            yield db_1.default.role.createMany({
+                data: [
+                    { roleName: "Admin" },
+                    { roleName: "Manager" },
+                    { roleName: "Cashier" },
+                    { roleName: "Barista" },
+                ],
+            });
+            console.log("Roles created");
+        }
+        // const branch = await prisma.branch.findFirst();
+        //
+        // if (!branch?.id) {
+        //   await prisma.branch.create({
+        //     data: {
+        //       streetAddress: "Avocado St.",
+        //       baranggay: "Sta. Rosa I",
+        //       city: "Marilao",
+        //       zipCode: 3019,
+        //       province: "Bulacan",
+        //       contactNumber: "09123456789",
+        //       region: "Region III",
+        //
+        //       users: {
+        //         create: {
+        //           firstname: "Michael",
+        //           lastname: "Gatmaitan",
+        //           username: "mikael",
+        //           password: "michealgatmaitan",
+        //           cpNum: "09499693314",
+        //
+        //           role: {
+        //             create: {
+        //               roleName: "System Admin",
+        //             },
+        //           },
+        //         },
+        //       },
+        //     },
+        //   });
+        //
+        //   console.log("Branch with user & role created");
+        // }
+        const user = yield db_1.default.user.findFirst();
+        if (!(user === null || user === void 0 ? void 0 : user.id)) {
+            yield db_1.default.user.create({
+                data: {
+                    firstname: "Michael",
+                    lastname: "Gatmaitan",
+                    password: "michealgatmaitan",
+                    username: "micheal29",
+                    cpNum: "09499693314",
+                    roleId: "090909",
+                    imagePath: "",
+                },
+            });
+        }
+        const product = yield db_1.default.product.findFirst();
+        if (!(product === null || product === void 0 ? void 0 : product.id)) {
+            yield db_1.default.product.create({
+                data: {
+                    productName: "Cafe latte",
+                    description: "Sample description",
+                    price: 90,
+                    category: {
+                        create: {
+                            categoryName: "Coffee",
+                        },
+                    },
+                },
+            });
+            console.log("Product created");
+        }
+        const rawMaterials = yield db_1.default.rawMaterial.findFirst();
+        if (!(rawMaterials === null || rawMaterials === void 0 ? void 0 : rawMaterials.id)) {
+            yield db_1.default.rawMaterial.createMany({
+                data: [
+                    { materialName: "Milk", quantityInUnitPerItem: 1000, rawPrice: 100 },
+                    {
+                        materialName: "Coffee grounds",
+                        quantityInUnitPerItem: 1000,
+                        rawPrice: 800,
+                    },
+                    {
+                        materialName: "Whip Cream",
+                        quantityInUnitPerItem: 1000,
+                        rawPrice: 120,
+                    },
+                    { materialName: "Cups", quantityInUnitPerItem: 50, rawPrice: 50 },
+                    { materialName: "Straw", quantityInUnitPerItem: 50, rawPrice: 50 },
+                    { materialName: "Water", quantityInUnitPerItem: 5000, rawPrice: 30 },
+                ],
+            });
+            console.log("Raw materials created");
+        }
+    });
+})();
 app.post("/login", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const body = req.body;
-    const user = yield prisma.user.findFirst({
+    const user = yield db_1.default.user.findFirst({
         where: {
             username: body.username,
             password: body.password,
@@ -50,10 +163,16 @@ app.post("/login", (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         res.json({ error: "User could not find" }).status(401);
         return;
     }
-    const generated = (0, jwt_1.generateToken)(user);
-    res.json({ token: generated });
-    // console.log(req.headers["authorization"]);
-    // return both generatedKey and
+    const token = yield (0, jwt_1.generateToken)(user);
+    res.json({ token });
+}));
+app.post("/signup", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const body = req.body;
+    const newUser = yield db_1.default.user.create({
+        data: body,
+    });
+    console.log(newUser);
+    res.json(newUser);
 }));
 app.listen(PORT, () => {
     console.log(`Connected to port ${PORT}`);

@@ -46,13 +46,13 @@ datasource db {
 
 // Experimental
 model Customer {
-  id                String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  username          String     @unique
-  password          String
-  email             String     @unique
-  phoneNumber       String?
-  createdAt         DateTime   @default(now())
-  orders            Order[]
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  username    String   @unique
+  password    String
+  email       String   @unique
+  phoneNumber String?
+  createdAt   DateTime @default(now())
+  orders      Order[]
 }
 
 // Inventory
@@ -76,12 +76,12 @@ model Order {
   orderedAt      DateTime      @default(now())
   // branchId       String        @db.Uuid
   userId         String        @db.Uuid
-  customerId          String?    @db.Uuid
+  customerId     String?       @db.Uuid
   customerNumber Int           @default(autoincrement())
   totalPrice     Float         @default(0)
   orderStatus    Boolean       @default(false)
   // branch         Branch        @relation(fields: [branchId], references: [id])
-  customer            Customer?  @relation(fields: [customerId], references: [id])
+  customer       Customer?     @relation(fields: [customerId], references: [id])
   user           User          @relation(fields: [userId], references: [id])
   orderItems     OrderItem[]
   transactions   Transaction[]
@@ -98,12 +98,12 @@ model OrderItem {
   // quantity * productPrice
 }
 
-
 // Product Catergory
 model Category {
   id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   categoryName String
   products     Product[]
+  // createdAt    DateTime  @default(now())
 }
 
 // Product
@@ -211,6 +211,8 @@ model User {
   password  String
   orders    Order[]
 }
+
+// model 
 
 // Less prio table
 

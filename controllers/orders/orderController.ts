@@ -29,8 +29,8 @@ interface ICreateOrderSelf {
  */
 
 export const createOrder = async (req: Request, res: Response) => {
-  const { orderBody, orderItemsBody, transactionBody }: ICreateOrderSelf =
-    req.body;
+  // transactionBody destructured
+  const { orderBody, orderItemsBody }: ICreateOrderSelf = req.body;
   const { userId } = orderBody;
 
   const result = await prisma.$transaction(async (prisma) => {
@@ -40,13 +40,10 @@ export const createOrder = async (req: Request, res: Response) => {
       select: { id: true, price: true },
     });
 
-    const productPriceMap = products.reduce(
-      (acc, product) => {
-        acc[product.id] = product.price;
-        return acc;
-      },
-      {} as Record<string, number>,
-    );
+    const productPriceMap = products.reduce((acc, product) => {
+      acc[product.id] = product.price;
+      return acc;
+    }, {} as Record<string, number>);
 
     console.log(productPriceMap);
 
@@ -73,9 +70,9 @@ export const createOrder = async (req: Request, res: Response) => {
           },
         },
 
-        transactions: {
-          create: transactionBody,
-        },
+        // transactions: {
+        //   create: transactionBody,
+        // },
       },
     });
 

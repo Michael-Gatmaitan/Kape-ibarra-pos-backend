@@ -4,7 +4,11 @@ import { Response, Request } from "express";
 import { ICreateCategoryBody } from "../../types/types";
 
 export const getCategories = async (req: Request, res: Response) => {
-  const categories = await prisma.category.findMany();
+  const categories = await prisma.category.findMany({
+    include: {
+      products: true,
+    },
+  });
   res.json(categories).status(200);
 };
 

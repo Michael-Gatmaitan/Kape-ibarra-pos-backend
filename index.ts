@@ -4,14 +4,13 @@ import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 
 // Routes
-import userRoute from "./routes/userRoutes";
 import orderRoute from "./routes/orderRoutes";
 import productRoute from "./routes/productRoutes";
 import categoryRoute from "./routes/categoryRoutes";
-import branchRoute from "./routes/branchRoutes";
 import roleRoute from "./routes/roleRoutes";
 import rawMaterialRoute from "./routes/rawMaterialRoutes";
 import recipeRoute from "./routes/recipeRoutes";
+import userRoute from "./routes/userRoutes";
 
 import prisma from "./config/db";
 import { generateToken, verifyToken } from "./auth/jwt";
@@ -37,13 +36,13 @@ dotenv.config();
 const PORT = process.env.PORT || 9999;
 
 app.use("/user", userRoute);
-// app.use("/branch", branchRoute);
 app.use("/product", productRoute);
 app.use("/category", categoryRoute);
 app.use("/order", orderRoute);
 app.use("/role", roleRoute);
 app.use("/raw-material", rawMaterialRoute);
 app.use("/recipe", recipeRoute);
+app.use("/user", userRoute);
 
 (async function () {
   const role = await prisma.role.findFirst({

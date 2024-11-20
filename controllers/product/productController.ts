@@ -17,22 +17,67 @@ interface IProductBody {
 }
 
 export const getProducts = async (req: Request, res: Response) => {
-  const categoryParam = req.query.category;
+  // For product name params
+  const productName = req.query.productName;
 
-  if (categoryParam === "true") {
-    const products = await prisma.product.findMany({
-      include: {
-        category: true,
-      },
-    });
+  // For category params
+  const categoryParam = req.query.category;
+  const categoryName = req.query.categoryName;
+
+  try {
+    if (categoryName !== undefined) {
+      if (categoryName === "all") {
+        const products = await prisma.product.findMany({
+          include: {
+            category: true,
+          },
+        });
+        res.json(products);
+        return;
+      }
+
+      const products = await prisma.product.findMany({
+        where: {
+          category: {
+            categoryName: categoryName.toString(),
+          },
+        },
+        include: {
+          category: true,
+        },
+      });
+
+      res.json(products);
+      return;
+    }
+
+    if (categoryParam === "true") {
+      const products = await prisma.product.findMany({
+        include: {
+          category: true,
+        },
+      });
+
+      res.json(products);
+      return;
+    }
+
+    if (productName !== undefined) {
+      const products = await prisma.product.findMany({
+        where: {
+          productName: { contains: productName.toString() },
+        },
+      });
+      res.json(products);
+      return;
+    }
+
+    const products = await prisma.product.findMany();
 
     res.json(products);
-    return;
+  } catch (err) {
+    res.json({ error: `There was an error fetching product: ${err}` });
   }
-
-  const products = await prisma.product.findMany();
-
-  res.json(products);
 };
 
 export const updateProductById = async (req: Request, res: Response) => {
@@ -106,6 +151,8 @@ export const updateProductById = async (req: Request, res: Response) => {
         recipes: true,
       },
     });
+
+    console.log("Update: ", updatedProduct);
     res.json(updatedProduct);
     return;
   } catch (err) {
@@ -154,6 +201,8 @@ export const createProduct = async (req: Request, res: Response) => {
       },
     },
   });
+
+  console.log("Create:", newProduct);
 
   if (!newProduct.id) {
     res.json({ error: "Creation of new product failed." });
