@@ -189,6 +189,10 @@ app.post("/signup", async (req: Request, res: Response) => {
   res.json(newUser);
 });
 
+app.get("/", (req: Request, res: Response) => {
+  res.json("Hello world");
+});
+
 app.listen(PORT, () => {
   console.log(`Connected to port ${PORT}`);
 });
