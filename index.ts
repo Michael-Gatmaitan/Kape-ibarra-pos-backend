@@ -10,15 +10,15 @@ import categoryRoute from "./routes/categoryRoutes";
 import roleRoute from "./routes/roleRoutes";
 import rawMaterialRoute from "./routes/rawMaterialRoutes";
 import recipeRoute from "./routes/recipeRoutes";
-import userRoute from "./routes/userRoutes";
+import employeeRoute from "./routes/employeeRoutes";
+import transactionRoute from "./routes/transactionRoutes";
 
 import prisma from "./config/db";
-import { generateToken, verifyToken } from "./auth/jwt";
-// import { generateToken } from "./auth/jwt";
+import { generateToken } from "./auth/jwt";
 
 import { Server } from "socket.io";
 import { createServer } from "http";
-import { ICreateUserBody } from "./types/types";
+import { ICreateEmployeeBody } from "./types/types";
 
 const app: Application = express();
 
@@ -35,26 +35,29 @@ dotenv.config();
 
 const PORT = process.env.PORT || 9999;
 
-app.use("/user", userRoute);
+app.get("/", (req: Request, res: Response) => {
+  res.json("Hello world");
+});
+
 app.use("/product", productRoute);
 app.use("/category", categoryRoute);
 app.use("/order", orderRoute);
 app.use("/role", roleRoute);
 app.use("/raw-material", rawMaterialRoute);
 app.use("/recipe", recipeRoute);
-app.use("/user", userRoute);
+app.use("/employee", employeeRoute);
+app.use("/transaction", transactionRoute);
 
 (async function () {
   const role = await prisma.role.findFirst({
     where: {
-      roleName: { in: ["Admin", "Manager", "Cashier", "Barista"] },
+      roleName: { in: ["Cashier", "Barista", "Customer"] },
     },
   });
 
   if (!role?.id) {
     await prisma.role.createMany({
       data: [
-        { roleName: "Admin" },
         { roleName: "Manager" },
         { roleName: "Cashier" },
         { roleName: "Barista" },
@@ -64,74 +67,48 @@ app.use("/user", userRoute);
     console.log("Roles created");
   }
 
-  // const branch = await prisma.branch.findFirst();
-  //
-  // if (!branch?.id) {
-  //   await prisma.branch.create({
+  const employee = await prisma.employee.findFirst({
+    where: { username: "micheal29" },
+  });
+
+  if (!employee?.id) {
+    await prisma.employee.create({
+      data: {
+        firstname: "Michael",
+        lastname: "Gatmaitan",
+        username: "micheal29",
+        password: "michealgatmaitan",
+        cpNum: "09499693314",
+        role: {
+          create: {
+            roleName: "Admin",
+          },
+        },
+        imagePath: "",
+      },
+    });
+  } else {
+    console.log("User exists: ", employee);
+  }
+
+  // const product = await prisma.product.findFirst();
+
+  // if (!product?.id) {
+  //   await prisma.product.create({
   //     data: {
-  //       streetAddress: "Avocado St.",
-  //       baranggay: "Sta. Rosa I",
-  //       city: "Marilao",
-  //       zipCode: 3019,
-  //       province: "Bulacan",
-  //       contactNumber: "09123456789",
-  //       region: "Region III",
-  //
-  //       users: {
+  //       productName: "Cafe latte",
+  //       description: "Sample description",
+  //       price: 90,
+  //       category: {
   //         create: {
-  //           firstname: "Michael",
-  //           lastname: "Gatmaitan",
-  //           username: "mikael",
-  //           password: "michealgatmaitan",
-  //           cpNum: "09499693314",
-  //
-  //           role: {
-  //             create: {
-  //               roleName: "System Admin",
-  //             },
-  //           },
+  //           categoryName: "Coffee",
   //         },
   //       },
   //     },
   //   });
-  //
-  //   console.log("Branch with user & role created");
+
+  //   console.log("Product created");
   // }
-
-  const user = await prisma.user.findFirst();
-
-  if (!user?.id) {
-    await prisma.user.create({
-      data: {
-        firstname: "Michael",
-        lastname: "Gatmaitan",
-        password: "michealgatmaitan",
-        username: "micheal29",
-        cpNum: "09499693314",
-        roleId: "090909",
-        imagePath: "",
-      },
-    });
-  }
-
-  const product = await prisma.product.findFirst();
-
-  if (!product?.id) {
-    await prisma.product.create({
-      data: {
-        productName: "Cafe latte",
-        description: "Sample description",
-        price: 90,
-        category: {
-          create: {
-            categoryName: "Coffee",
-          },
-        },
-      },
-    });
-
-    console.log("Product created");
-  }
 
   const rawMaterials = await prisma.rawMaterial.findFirst();
   if (!rawMaterials?.id) {
@@ -161,38 +138,36 @@ app.use("/user", userRoute);
 app.post("/login", async (req: Request, res: Response) => {
   const body: { username: string; password: string } = req.body;
 
-  const user = await prisma.user.findFirst({
+  const employee = await prisma.employee.findFirst({
     where: {
       username: body.username,
       password: body.password,
     },
   });
 
-  if (user === null) {
+  if (employee === null) {
     res.json({ error: "User could not find" }).status(401);
     return;
   }
 
-  const token = await generateToken(user);
+  const token = await generateToken(employee);
   res.json({ token });
 });
 
 app.post("/signup", async (req: Request, res: Response) => {
-  const body: ICreateUserBody = req.body;
+  const body: ICreateEmployeeBody = req.body;
 
-  const newUser = await prisma.user.create({
+  const newEmployee = await prisma.employee.create({
     data: body,
   });
 
-  console.log(newUser);
+  console.log(newEmployee);
 
-  res.json(newUser);
-});
-
-app.get("/", (req: Request, res: Response) => {
-  res.json("Hello world");
+  res.json(newEmployee);
 });
 
 app.listen(PORT, () => {
   console.log(`Connected to port ${PORT}`);
 });
+
+module.exports = app;

@@ -1,16 +1,16 @@
 import prisma from "../config/db";
 import { Request, Response, NextFunction } from "express";
-import { IUser } from "../types/types";
+import { IEmployee } from "../types/types";
 import jwt, { Secret } from "jsonwebtoken";
 
 const SECRET_KEY: Secret = process.env.SECRET_KEY as string;
 
-export const generateToken = async (user: IUser) => {
+export const generateToken = async (employee: IEmployee) => {
   const roleName = (
-    await prisma.role.findFirstOrThrow({ where: { id: user.roleId } })
+    await prisma.role.findFirstOrThrow({ where: { id: employee.roleId } })
   ).roleName;
 
-  return jwt.sign({ user, roleName }, SECRET_KEY);
+  return jwt.sign({ employee, roleName }, SECRET_KEY);
 };
 
 export const verifyToken = (

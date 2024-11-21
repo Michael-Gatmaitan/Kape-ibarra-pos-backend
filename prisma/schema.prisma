@@ -12,41 +12,15 @@ generator client {
 datasource db {
   provider   = "postgresql"
   url        = env("DATABASE_URL")
+  // directUrl  = env("DIRECT_URL")
   extensions = [pgcrypto]
-  // directUrl = env("DIRECT_URL")
 }
-
-// model Branch {
-//   id            String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-//   streetAddress String @unique
-//   baranggay     String
-//   city          String
-//   zipCode       Int
-
-//   province      String
-//   region        String
-//   contactNumber String
-
-//   // PKs
-//   users               User[]
-//   // totalExpensesPerDay TotalExpensesPerDay[]
-//   inventories         Inventory[]
-//   orders              Order[]
-//   profits             Profit[]
-//   transactions        Transaction[]
-// }
-
-// model Expense {
-//   id                    String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-//   // totalExpensesPerDay   TotalExpensesPerDay @relation(fields: [totalExpensesPerDayId], references: [id])
-//   // totalExpensesPerDayId String              @db.Uuid
-//   expenseAmount         Int
-//   descriptionOfExpense  String
-// }
 
 // Experimental
 model Customer {
   id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  firstname   String
+  lastname    String
   username    String   @unique
   password    String
   email       String   @unique
@@ -58,8 +32,6 @@ model Customer {
 // Inventory
 model Inventory {
   id                  String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  // branch              Branch               @relation(fields: [branchId], references: [id])
-  // branchId            String               @db.Uuid
   rawMaterial         RawMaterial          @relation(fields: [rawMaterialId], references: [id])
   rawMaterialId       String               @db.Uuid
   quantityInUnit      Int
@@ -74,15 +46,13 @@ model Inventory {
 model Order {
   id             String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   orderedAt      DateTime      @default(now())
-  // branchId       String        @db.Uuid
-  userId         String        @db.Uuid
+  employeeId     String        @db.Uuid
   customerId     String?       @db.Uuid
-  customerNumber Int           @default(autoincrement())
+  customerNumber Int?          @default(autoincrement())
   totalPrice     Float         @default(0)
   orderStatus    Boolean       @default(false)
-  // branch         Branch        @relation(fields: [branchId], references: [id])
   customer       Customer?     @relation(fields: [customerId], references: [id])
-  user           User          @relation(fields: [userId], references: [id])
+  employee       Employee      @relation(fields: [employeeId], references: [id])
   orderItems     OrderItem[]
   transactions   Transaction[]
 }
@@ -122,16 +92,10 @@ model Product {
 
 // Profit
 
-model Profit {
-  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  // totalExpensesPerDay   TotalExpensesPerDay @relation(fields: [totalExpensesPerDayId], references: [id])
-  // totalExpensesPerDayId String              @db.Uuid
-  // branch                Branch              @relation(fields: [branchId], references: [id])
-  // branchId              String              @db.Uuid
-  days        Int
-  date        DateTime
-  dailySales  Float
-  dailyProfit Float
+model Sales {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  date       DateTime
+  dailySales Float
 }
 
 // RawMaterial
@@ -159,50 +123,35 @@ model Recipe {
 
 // Role
 model Role {
-  id       String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  roleName String
-  users    User[]
+  id        String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  roleName  String
+  employees Employee[]
 }
-
-// model TotalExpensesPerDay {
-//   id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-//   branch        Branch    @relation(fields: [branchId], references: [id])
-//   branchId      String    @db.Uuid
-//   days          Int
-//   date          DateTime
-//   totalExpenses Float
-//   expenses      Expense[]
-//   profits       Profit[]
-// }
 
 model Transaction {
   id            String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   order         Order  @relation(fields: [orderId], references: [id])
   orderId       String @db.Uuid
-  // branch        Branch @relation(fields: [branchId], references: [id])
-  // branchId      String @db.Uuid
   paymentMethod String
   totalAmount   Float
 
   totalTendered Float
   change        Float
-  vatAmount     Float
-  vatableSales  Float
+  vatAmount     Float?
+  vatableSales  Float?
 
   transactionDate DateTime @default(now())
 }
 
-model Tax {
-  id         String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  taxPercent Float
-}
+// model Tax {
+//   id         String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+//   taxPercent Float
+// }
 
-model User {
+model Employee {
   id        String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   role      Role    @relation(fields: [roleId], references: [id])
   roleId    String  @db.Uuid
-  // branch    Branch  @relation(fields: [branchId], references: [id])
-  // branchId  String  @db.Uuid
   imagePath String?
   firstname String
   lastname  String
@@ -211,10 +160,6 @@ model User {
   password  String
   orders    Order[]
 }
-
-// model 
-
-// Less prio table
 
 model Batch {
   id                  String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
@@ -236,4 +181,5 @@ model SystemNotification {
   notificationDate DateTime
   stauts           String
   isSolved         Boolean
+  createdAt        DateTime  @default(now())
 }

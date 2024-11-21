@@ -63,16 +63,6 @@ export interface IProduct {
   createdAt: string;
 }
 
-export interface IProfit {
-  id: string;
-  totalExpensesPerDayId: string;
-  brachId: string;
-  days: number;
-  date: string;
-  dailySales: number;
-  dailyProfit: number;
-}
-
 export interface IRawMaterial {
   id: string;
   materialName: string;
@@ -103,7 +93,7 @@ export interface ITransaction {
   paymentMethod: string;
   amountPaid: string;
 }
-export interface IUser {
+export interface IEmployee {
   id: string;
   roleId: string;
   // branchId: string;
@@ -142,13 +132,11 @@ export type ICreateOrderItemBody = Prisma.OrderItemUncheckedCreateInput;
 
 export type ICreateCategoryBody = Prisma.CategoryUncheckedCreateInput;
 
-export type ICreateProfitBody = Prisma.ProfitUncheckedCreateInput;
-
 export type ICreateRecipeBody = Prisma.RecipeUncheckedCreateInput;
 
 export type ICreateRoleBody = Prisma.RoleUncheckedCreateInput;
 
-export type ICreateUserBody = Prisma.UserUncheckedCreateInput;
+export type ICreateEmployeeBody = Prisma.EmployeeUncheckedCreateInput;
 
 export type ICreateRawMaterialBody = Prisma.RawMaterialUncheckedCreateInput;
 
