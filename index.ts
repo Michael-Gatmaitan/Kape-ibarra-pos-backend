@@ -12,6 +12,7 @@ import rawMaterialRoute from "./routes/rawMaterialRoutes";
 import recipeRoute from "./routes/recipeRoutes";
 import employeeRoute from "./routes/employeeRoutes";
 import transactionRoute from "./routes/transactionRoutes";
+import customerRoute from "./routes/customerRoutes";
 
 import prisma from "./config/db";
 import { generateToken } from "./auth/jwt";
@@ -47,6 +48,7 @@ app.use("/raw-material", rawMaterialRoute);
 app.use("/recipe", recipeRoute);
 app.use("/employee", employeeRoute);
 app.use("/transaction", transactionRoute);
+app.use("/customer", customerRoute);
 
 (async function () {
   const role = await prisma.role.findFirst({
@@ -91,6 +93,21 @@ app.use("/transaction", transactionRoute);
     console.log("User exists: ", employee);
   }
 
+  // Sample customer
+  const customer = await prisma.customer.findFirst();
+  if (!customer) {
+    await prisma.customer.create({
+      data: {
+        email: "fidelrevo@gmail.com",
+        firstname: "Fidel",
+        lastname: "Revo",
+        username: "remvo123",
+        password: "fidelrevo",
+        phoneNumber: "09123456789",
+      },
+    });
+  }
+
   // const product = await prisma.product.findFirst();
 
   // if (!product?.id) {
@@ -109,6 +126,17 @@ app.use("/transaction", transactionRoute);
 
   //   console.log("Product created");
   // }
+
+  const categories = await prisma.category.findMany();
+  if (categories.length !== 3) {
+    await prisma.category.createMany({
+      data: [
+        { categoryName: "Coffee" },
+        { categoryName: "Non-Coffee" },
+        { categoryName: "Milk tea" },
+      ],
+    });
+  }
 
   const rawMaterials = await prisma.rawMaterial.findFirst();
   if (!rawMaterials?.id) {

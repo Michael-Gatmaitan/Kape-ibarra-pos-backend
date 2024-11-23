@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import prisma from "../../config/db";
 import { Prisma } from "@prisma/client";
-import { ICreateOrderBody, ICreateOrderItemBody } from "../../types/types";
+import { ICreateOrderBody } from "../../types/types";
 import { createTransactionModel } from "../../models/transactionModel";
 
 interface ICreateOrderSelf {
@@ -36,7 +36,7 @@ export const createOrder = async (req: Request, res: Response) => {
   // transactionBody destructured
   const { orderBody, orderItemsBody, transactionBody }: ICreateOrderSelf =
     req.body;
-  const { employeeId } = orderBody;
+  const { employeeId, orderType } = orderBody;
 
   const { totalAmount, totalTendered, change, paymentMethod } = transactionBody;
 
@@ -44,6 +44,8 @@ export const createOrder = async (req: Request, res: Response) => {
     const newOrder = await prisma.order.create({
       data: {
         employeeId,
+        totalPrice: totalAmount,
+        orderType,
 
         orderItems: {
           createMany: {
@@ -53,76 +55,66 @@ export const createOrder = async (req: Request, res: Response) => {
       },
     });
 
-    const newTransaction = await createTransactionModel({
-      orderId: newOrder.id,
-      change,
-      totalAmount,
-      totalTendered,
-      paymentMethod,
-    });
+    if (orderType === "walk-in") {
+      const newTransaction = await createTransactionModel({
+        orderId: newOrder.id,
+        change,
+        totalAmount,
+        totalTendered,
+        paymentMethod,
+      });
 
-    console.log("New transaction created: ", newTransaction);
-    console.log("YOu just made order!!!", newOrder);
+      console.log("New transaction created: ", newTransaction);
+      console.log("YOu just made order!!!", newOrder);
+    }
 
     res.json(newOrder);
   } catch (err) {
     console.log(err);
     res.json({ error: `Error in creating transaction: ${err}` });
   }
+};
 
-  // const newTransaction = await prisma.transaction.create({
-  //   data: {
-  //     change:
-  //   }
-  // })
+export const getAllOrders = async (req: Request, res: Response) => {
+  try {
+    const orders = await prisma.order.findMany();
+    res.json(orders);
+  } catch (err) {
+    res.json({ error: `Error in getting all orders: ${err}` });
+  }
+};
 
-  // const result = await prisma.$transaction(async (prisma) => {
-  //   const productIds = orderItemsBody.map((item) => item.productId);
-  //   const products = await prisma.product.findMany({
-  //     where: { id: { in: productIds } },
-  //     select: { id: true, price: true },
-  //   });
+export const getOrderById = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const { orderItems, employee, customer } = req.query;
 
-  //   const productPriceMap = products.reduce((acc, product) => {
-  //     acc[product.id] = product.price;
-  //     return acc;
-  //   }, {} as Record<string, number>);
+  if (!id) {
+    res.json({ error: "Id is not defined" }).status(401);
+    return;
+  }
 
-  //   console.log(productPriceMap);
+  try {
+    const order = await prisma.order.findFirst({
+      where: { id: id.toString() },
+      include: {
+        orderItems:
+          orderItems === "true"
+            ? {
+                include: { product: true },
+              }
+            : false,
+        employee: employee === "true",
+        customer: customer === "true",
+      },
+    });
 
-  //   const updatedOrderItemsBody = orderItemsBody.map((item) => ({
-  //     ...item,
-  //     quantityAmount: item.quantity * (productPriceMap[item.productId] || 0),
-  //   }));
+    if (!order?.id) {
+      res.json({ message: "Order do not exist." }).status(401);
+      return;
+    }
 
-  //   let orderTotalPrice = 0;
-  //   updatedOrderItemsBody.map((orderItem) => {
-  //     orderTotalPrice += orderItem.quantityAmount;
-  //   });
-
-  //   console.log(updatedOrderItemsBody, orderTotalPrice);
-
-  //   const newOrder = await prisma.order.create({
-  //     data: {
-  //       employeeId,
-  //       totalPrice: orderTotalPrice,
-
-  //       orderItems: {
-  //         createMany: {
-  //           data: updatedOrderItemsBody,
-  //         },
-  //       },
-
-  //       // transactions: {
-  //       //   create: transactionBody,
-  //       // },
-  //     },
-  //   });
-
-  //   // get the order base on order Id OR get order base on orderBodyItems
-
-  //   return newOrder;
-  // });
-
-  // res.json(result);
+    res.json(order);
+  } catch (err) {
+    res.json({ error: `There was a problem getting order with id of ${id}` });
+  }
 };

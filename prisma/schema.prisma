@@ -44,27 +44,30 @@ model Inventory {
 // Orders
 
 model Order {
-  id             String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  orderedAt      DateTime      @default(now())
-  employeeId     String        @db.Uuid
-  customerId     String?       @db.Uuid
-  customerNumber Int?          @default(autoincrement())
-  totalPrice     Float         @default(0)
-  orderStatus    Boolean       @default(false)
-  customer       Customer?     @relation(fields: [customerId], references: [id])
-  employee       Employee      @relation(fields: [employeeId], references: [id])
-  orderItems     OrderItem[]
-  transactions   Transaction[]
+  id                String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orderedAt         DateTime      @default(now())
+  employeeId        String        @db.Uuid
+  customerId        String?       @db.Uuid
+  customerNumber    Int?          @default(autoincrement())
+  totalPrice        Float         @default(0)
+  orderStatus       String        @default("preparing") // preparing, payment pending, ready to pickup, rejected
+  proofOfPaymentImg String? //
+  orderType         String // 'walk-in', 'online'
+  customer          Customer?     @relation(fields: [customerId], references: [id])
+  employee          Employee      @relation(fields: [employeeId], references: [id])
+  orderItems        OrderItem[]
+  transactions      Transaction[]
 }
 
 model OrderItem {
-  id             String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  order          Order   @relation(fields: [orderId], references: [id])
-  orderId        String  @db.Uuid
-  product        Product @relation(fields: [productId], references: [id])
-  productId      String  @db.Uuid
-  quantity       Int
-  quantityAmount Float // Total price, 
+  id                   String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  order                Order   @relation(fields: [orderId], references: [id])
+  orderId              String  @db.Uuid
+  product              Product @relation(fields: [productId], references: [id])
+  productId            String  @db.Uuid
+  recordedProductPrice Float   @default(0)
+  quantity             Int
+  quantityAmount       Float // Total price, 
   // quantity * productPrice
 }
 

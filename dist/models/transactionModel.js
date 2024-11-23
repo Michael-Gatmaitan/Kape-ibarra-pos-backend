@@ -12,26 +12,18 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.verifyToken = exports.generateToken = void 0;
+exports.createTransactionModel = void 0;
 const db_1 = __importDefault(require("../config/db"));
-const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
-const SECRET_KEY = process.env.SECRET_KEY;
-const generateToken = (employee) => __awaiter(void 0, void 0, void 0, function* () {
-    const roleName = (yield db_1.default.role.findFirstOrThrow({ where: { id: employee.roleId } })).roleName;
-    return jsonwebtoken_1.default.sign({ employee, roleName }, SECRET_KEY);
-});
-exports.generateToken = generateToken;
-const verifyToken = (req, res, next) => {
-    const token = req.headers["authorization"];
-    if (!token) {
-        res.status(401).json({ error: "Access denied" });
-        return;
-    }
-    jsonwebtoken_1.default.verify(token, SECRET_KEY, (error, decoded) => {
-        if (error)
-            res.status(403).json({ error: "Invalid  token" });
-        console.log("Validated");
-        next();
+const createTransactionModel = (_a) => __awaiter(void 0, [_a], void 0, function* ({ orderId, change, paymentMethod, totalAmount, totalTendered, }) {
+    const newTransaction = yield db_1.default.transaction.create({
+        data: {
+            orderId,
+            change,
+            paymentMethod,
+            totalAmount,
+            totalTendered,
+        },
     });
-};
-exports.verifyToken = verifyToken;
+    return newTransaction;
+});
+exports.createTransactionModel = createTransactionModel;

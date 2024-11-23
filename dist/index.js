@@ -23,10 +23,11 @@ const categoryRoutes_1 = __importDefault(require("./routes/categoryRoutes"));
 const roleRoutes_1 = __importDefault(require("./routes/roleRoutes"));
 const rawMaterialRoutes_1 = __importDefault(require("./routes/rawMaterialRoutes"));
 const recipeRoutes_1 = __importDefault(require("./routes/recipeRoutes"));
-const userRoutes_1 = __importDefault(require("./routes/userRoutes"));
+const employeeRoutes_1 = __importDefault(require("./routes/employeeRoutes"));
+const transactionRoutes_1 = __importDefault(require("./routes/transactionRoutes"));
+const customerRoutes_1 = __importDefault(require("./routes/customerRoutes"));
 const db_1 = __importDefault(require("./config/db"));
 const jwt_1 = require("./auth/jwt");
-// import { generateToken } from "./auth/jwt";
 const socket_io_1 = require("socket.io");
 const http_1 = require("http");
 const app = (0, express_1.default)();
@@ -37,145 +38,147 @@ app.use(express_1.default.json());
 app.use((0, cors_1.default)());
 app.use((0, cookie_parser_1.default)());
 dotenv_1.default.config();
-// const PORT = process.env.PORT || 9999;
+const PORT = process.env.PORT || 9999;
 app.get("/", (req, res) => {
     res.json("Hello world");
 });
-app.use("/user", userRoutes_1.default);
 app.use("/product", productRoutes_1.default);
 app.use("/category", categoryRoutes_1.default);
 app.use("/order", orderRoutes_1.default);
 app.use("/role", roleRoutes_1.default);
 app.use("/raw-material", rawMaterialRoutes_1.default);
 app.use("/recipe", recipeRoutes_1.default);
-app.use("/user", userRoutes_1.default);
-// (async function () {
-// const role = await prisma.role.findFirst({
-//   where: {
-//     roleName: { in: ["Admin", "Manager", "Cashier", "Barista"] },
-//   },
-// });
-// if (!role?.id) {
-//   await prisma.role.createMany({
-//     data: [
-//       { roleName: "Admin" },
-//       { roleName: "Manager" },
-//       { roleName: "Cashier" },
-//       { roleName: "Barista" },
-//     ],
-//   });
-//   console.log("Roles created");
-// }
-// const branch = await prisma.branch.findFirst();
-//
-// if (!branch?.id) {
-//   await prisma.branch.create({
-//     data: {
-//       streetAddress: "Avocado St.",
-//       baranggay: "Sta. Rosa I",
-//       city: "Marilao",
-//       zipCode: 3019,
-//       province: "Bulacan",
-//       contactNumber: "09123456789",
-//       region: "Region III",
-//
-//       users: {
-//         create: {
-//           firstname: "Michael",
-//           lastname: "Gatmaitan",
-//           username: "mikael",
-//           password: "michealgatmaitan",
-//           cpNum: "09499693314",
-//
-//           role: {
-//             create: {
-//               roleName: "System Admin",
-//             },
-//           },
-//         },
-//       },
-//     },
-//   });
-//
-//   console.log("Branch with user & role created");
-// }
-// const user = await prisma.user.findFirst();
-// if (!user?.id) {
-//   await prisma.user.create({
-//     data: {
-//       firstname: "Michael",
-//       lastname: "Gatmaitan",
-//       password: "michealgatmaitan",
-//       username: "micheal29",
-//       cpNum: "09499693314",
-//       roleId: "090909",
-//       imagePath: "",
-//     },
-//   });
-// }
-// const product = await prisma.product.findFirst();
-// if (!product?.id) {
-//   await prisma.product.create({
-//     data: {
-//       productName: "Cafe latte",
-//       description: "Sample description",
-//       price: 90,
-//       category: {
-//         create: {
-//           categoryName: "Coffee",
-//         },
-//       },
-//     },
-//   });
-//   console.log("Product created");
-// }
-// const rawMaterials = await prisma.rawMaterial.findFirst();
-// if (!rawMaterials?.id) {
-//   await prisma.rawMaterial.createMany({
-//     data: [
-//       { materialName: "Milk", quantityInUnitPerItem: 1000, rawPrice: 100 },
-//       {
-//         materialName: "Coffee grounds",
-//         quantityInUnitPerItem: 1000,
-//         rawPrice: 800,
-//       },
-//       {
-//         materialName: "Whip Cream",
-//         quantityInUnitPerItem: 1000,
-//         rawPrice: 120,
-//       },
-//       { materialName: "Cups", quantityInUnitPerItem: 50, rawPrice: 50 },
-//       { materialName: "Straw", quantityInUnitPerItem: 50, rawPrice: 50 },
-//       { materialName: "Water", quantityInUnitPerItem: 5000, rawPrice: 30 },
-//     ],
-//   });
-//   console.log("Raw materials created");
-// }
-// })();
+app.use("/employee", employeeRoutes_1.default);
+app.use("/transaction", transactionRoutes_1.default);
+app.use("/customer", customerRoutes_1.default);
+(function () {
+    return __awaiter(this, void 0, void 0, function* () {
+        const role = yield db_1.default.role.findFirst({
+            where: {
+                roleName: { in: ["Cashier", "Barista", "Customer"] },
+            },
+        });
+        if (!(role === null || role === void 0 ? void 0 : role.id)) {
+            yield db_1.default.role.createMany({
+                data: [
+                    { roleName: "Manager" },
+                    { roleName: "Cashier" },
+                    { roleName: "Barista" },
+                ],
+            });
+            console.log("Roles created");
+        }
+        const employee = yield db_1.default.employee.findFirst({
+            where: { username: "micheal29" },
+        });
+        if (!(employee === null || employee === void 0 ? void 0 : employee.id)) {
+            yield db_1.default.employee.create({
+                data: {
+                    firstname: "Michael",
+                    lastname: "Gatmaitan",
+                    username: "micheal29",
+                    password: "michealgatmaitan",
+                    cpNum: "09499693314",
+                    role: {
+                        create: {
+                            roleName: "Admin",
+                        },
+                    },
+                    imagePath: "",
+                },
+            });
+        }
+        else {
+            console.log("User exists: ", employee);
+        }
+        // Sample customer
+        const customer = yield db_1.default.customer.findFirst();
+        if (!customer) {
+            yield db_1.default.customer.create({
+                data: {
+                    email: "fidelrevo@gmail.com",
+                    firstname: "Fidel",
+                    lastname: "Revo",
+                    username: "remvo123",
+                    password: "fidelrevo",
+                    phoneNumber: "09123456789",
+                },
+            });
+        }
+        // const product = await prisma.product.findFirst();
+        // if (!product?.id) {
+        //   await prisma.product.create({
+        //     data: {
+        //       productName: "Cafe latte",
+        //       description: "Sample description",
+        //       price: 90,
+        //       category: {
+        //         create: {
+        //           categoryName: "Coffee",
+        //         },
+        //       },
+        //     },
+        //   });
+        //   console.log("Product created");
+        // }
+        const categories = yield db_1.default.category.findMany();
+        if (categories.length !== 3) {
+            yield db_1.default.category.createMany({
+                data: [
+                    { categoryName: "Coffee" },
+                    { categoryName: "Non-Coffee" },
+                    { categoryName: "Milk tea" },
+                ],
+            });
+        }
+        const rawMaterials = yield db_1.default.rawMaterial.findFirst();
+        if (!(rawMaterials === null || rawMaterials === void 0 ? void 0 : rawMaterials.id)) {
+            yield db_1.default.rawMaterial.createMany({
+                data: [
+                    { materialName: "Milk", quantityInUnitPerItem: 1000, rawPrice: 100 },
+                    {
+                        materialName: "Coffee grounds",
+                        quantityInUnitPerItem: 1000,
+                        rawPrice: 800,
+                    },
+                    {
+                        materialName: "Whip Cream",
+                        quantityInUnitPerItem: 1000,
+                        rawPrice: 120,
+                    },
+                    { materialName: "Cups", quantityInUnitPerItem: 50, rawPrice: 50 },
+                    { materialName: "Straw", quantityInUnitPerItem: 50, rawPrice: 50 },
+                    { materialName: "Water", quantityInUnitPerItem: 5000, rawPrice: 30 },
+                ],
+            });
+            console.log("Raw materials created");
+        }
+    });
+})();
 app.post("/login", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const body = req.body;
-    const user = yield db_1.default.user.findFirst({
+    const employee = yield db_1.default.employee.findFirst({
         where: {
             username: body.username,
             password: body.password,
         },
     });
-    if (user === null) {
+    if (employee === null) {
         res.json({ error: "User could not find" }).status(401);
         return;
     }
-    const token = yield (0, jwt_1.generateToken)(user);
+    const token = yield (0, jwt_1.generateToken)(employee);
     res.json({ token });
 }));
 app.post("/signup", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const body = req.body;
-    const newUser = yield db_1.default.user.create({
+    const newEmployee = yield db_1.default.employee.create({
         data: body,
     });
-    console.log(newUser);
-    res.json(newUser);
+    console.log(newEmployee);
+    res.json(newEmployee);
 }));
-app.listen(9999, () => {
-    console.log(`Connected to port ${9999}`);
+app.listen(PORT, () => {
+    console.log(`Connected to port ${PORT}`);
 });
 module.exports = app;

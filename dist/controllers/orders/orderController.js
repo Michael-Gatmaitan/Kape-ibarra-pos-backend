@@ -12,8 +12,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createOrder = void 0;
+exports.getOrderById = exports.getAllOrders = exports.createOrder = void 0;
 const db_1 = __importDefault(require("../../config/db"));
+const transactionModel_1 = require("../../models/transactionModel");
 /**
  *
  * @param orderBody
@@ -27,49 +28,89 @@ const db_1 = __importDefault(require("../../config/db"));
  *
  * @param transactionBody
  *        {
- *          amountPaid
+ *          orderId
+ *          totalAmount
+ *          totalTendered,
+ *          change
  *          paymentMethod
  *        }
  *
  */
 const createOrder = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     // transactionBody destructured
-    const { orderBody, orderItemsBody } = req.body;
-    const { userId } = orderBody;
-    const result = yield db_1.default.$transaction((prisma) => __awaiter(void 0, void 0, void 0, function* () {
-        const productIds = orderItemsBody.map((item) => item.productId);
-        const products = yield prisma.product.findMany({
-            where: { id: { in: productIds } },
-            select: { id: true, price: true },
-        });
-        const productPriceMap = products.reduce((acc, product) => {
-            acc[product.id] = product.price;
-            return acc;
-        }, {});
-        console.log(productPriceMap);
-        const updatedOrderItemsBody = orderItemsBody.map((item) => (Object.assign(Object.assign({}, item), { quantityAmount: item.quantity * (productPriceMap[item.productId] || 0) })));
-        let orderTotalPrice = 0;
-        updatedOrderItemsBody.map((orderItem) => {
-            orderTotalPrice += orderItem.quantityAmount;
-        });
-        console.log(updatedOrderItemsBody, orderTotalPrice);
-        const newOrder = yield prisma.order.create({
+    const { orderBody, orderItemsBody, transactionBody } = req.body;
+    const { employeeId, orderType } = orderBody;
+    const { totalAmount, totalTendered, change, paymentMethod } = transactionBody;
+    try {
+        const newOrder = yield db_1.default.order.create({
             data: {
-                userId,
-                totalPrice: orderTotalPrice,
+                employeeId,
+                totalPrice: totalAmount,
+                orderType,
                 orderItems: {
                     createMany: {
-                        data: updatedOrderItemsBody,
+                        data: orderItemsBody,
                     },
                 },
-                // transactions: {
-                //   create: transactionBody,
-                // },
             },
         });
-        // get the order base on order Id OR get order base on orderBodyItems
-        return newOrder;
-    }));
-    res.json(result);
+        if (orderType === "walk-in") {
+            const newTransaction = yield (0, transactionModel_1.createTransactionModel)({
+                orderId: newOrder.id,
+                change,
+                totalAmount,
+                totalTendered,
+                paymentMethod,
+            });
+            console.log("New transaction created: ", newTransaction);
+            console.log("YOu just made order!!!", newOrder);
+        }
+        res.json(newOrder);
+    }
+    catch (err) {
+        console.log(err);
+        res.json({ error: `Error in creating transaction: ${err}` });
+    }
 });
 exports.createOrder = createOrder;
+const getAllOrders = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const orders = yield db_1.default.order.findMany();
+        res.json(orders);
+    }
+    catch (err) {
+        res.json({ error: `Error in getting all orders: ${err}` });
+    }
+});
+exports.getAllOrders = getAllOrders;
+const getOrderById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { id } = req.params;
+    const { orderItems, employee, customer } = req.query;
+    if (!id) {
+        res.json({ error: "Id is not defined" }).status(401);
+        return;
+    }
+    try {
+        const order = yield db_1.default.order.findFirst({
+            where: { id: id.toString() },
+            include: {
+                orderItems: orderItems === "true"
+                    ? {
+                        include: { product: true },
+                    }
+                    : false,
+                employee: employee === "true",
+                customer: customer === "true",
+            },
+        });
+        if (!(order === null || order === void 0 ? void 0 : order.id)) {
+            res.json({ message: "Order do not exist." }).status(401);
+            return;
+        }
+        res.json(order);
+    }
+    catch (err) {
+        res.json({ error: `There was a problem getting order with id of ${id}` });
+    }
+});
+exports.getOrderById = getOrderById;
