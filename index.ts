@@ -69,6 +69,29 @@ app.use("/customer", customerRoute);
     console.log("Roles created");
   }
 
+  const systemPh = await prisma.employee.findFirst({
+    where: { id: "c65b9c9c-c016-4ef7-bfc6-c631cb7eaa9e" },
+  });
+
+  if (!systemPh) {
+    await prisma.employee.create({
+      data: {
+        id: "c65b9c9c-c016-4ef7-bfc6-c631cb7eaa9e",
+        firstname: "System",
+        lastname: "System",
+        cpNum: "System",
+        imagePath: "",
+        username: "sys",
+        password: "sys",
+        role: {
+          create: {
+            roleName: "System",
+          },
+        },
+      },
+    });
+  }
+
   const employee = await prisma.employee.findFirst({
     where: { username: "micheal29" },
   });
@@ -107,25 +130,6 @@ app.use("/customer", customerRoute);
       },
     });
   }
-
-  // const product = await prisma.product.findFirst();
-
-  // if (!product?.id) {
-  //   await prisma.product.create({
-  //     data: {
-  //       productName: "Cafe latte",
-  //       description: "Sample description",
-  //       price: 90,
-  //       category: {
-  //         create: {
-  //           categoryName: "Coffee",
-  //         },
-  //       },
-  //     },
-  //   });
-
-  //   console.log("Product created");
-  // }
 
   const categories = await prisma.category.findMany();
   if (categories.length !== 3) {

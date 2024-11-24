@@ -44,19 +44,26 @@ model Inventory {
 // Orders
 
 model Order {
-  id                String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  orderedAt         DateTime      @default(now())
-  employeeId        String        @db.Uuid
-  customerId        String?       @db.Uuid
-  customerNumber    Int?          @default(autoincrement())
-  totalPrice        Float         @default(0)
-  orderStatus       String        @default("preparing") // preparing, payment pending, ready to pickup, rejected
+  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orderedAt         DateTime @default(now())
+  employeeId        String   @db.Uuid
+  customerId        String?  @db.Uuid
+  customerNumber    Int?     @default(autoincrement())
+  totalPrice        Float    @default(0)
+  orderStatus       String   @default("preparing") // preparing, payment pending, ready to pickup, rejected
   proofOfPaymentImg String? //
   orderType         String // 'walk-in', 'online'
-  customer          Customer?     @relation(fields: [customerId], references: [id])
-  employee          Employee      @relation(fields: [employeeId], references: [id])
-  orderItems        OrderItem[]
-  transactions      Transaction[]
+  baristaId         String?  @db.Uuid
+
+  customer Customer? @relation(fields: [customerId], references: [id])
+  employee Employee  @relation(fields: [employeeId], references: [id], name: "OrderEmployee", map: "fk_order_employee")
+  barista  Employee? @relation(fields: [baristaId], references: [id], name: "OrderBarista", map: "fk_order_barista")
+
+  // paymentMethod     String?
+  // diningOption      String?
+  orderItems   OrderItem[]
+  transactions Transaction[]
+  Employee     Employee      @relation(fields: [employeeId], references: [id])
 }
 
 model OrderItem {
@@ -161,7 +168,10 @@ model Employee {
   cpNum     String
   username  String
   password  String
-  orders    Order[]
+
+  orders        Order[]
+  ordersManaged Order[] @relation("OrderEmployee")
+  orderPrepared Order[] @relation("OrderBarista")
 }
 
 model Batch {

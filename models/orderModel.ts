@@ -8,24 +8,31 @@ import { IUpdateOrderItemBody } from "../types/types";
 // ? Multiple orderItems in 1 order
 
 // Get
-export const getOrderItems = async () => {
-  return await prisma.orderItem.findMany();
+export const getLastOrder = async () => {
+  const order = await prisma.order.findMany({
+    orderBy: {
+      customerNumber: "desc",
+    },
+    take: 1,
+  });
+
+  return order;
 };
 
-export const getOrderItemsById = async (id: string) => {
-  return await prisma.orderItem.findFirst({ where: { id } });
+export const getOrderByOrderStatus = async (orderStatus: string) => {
+  const orders = await prisma.order.findMany({
+    where: { orderStatus },
+  });
+
+  return orders;
 };
 
-// Delete
-export const deleteOrderItem = async (id: string) => {
-  return await prisma.orderItem.delete({ where: { id } });
-};
+export const getOrderByEmployeeId = async (employeeId: string) => {
+  const orders = await prisma.order.findMany({
+    where: { employeeId },
+  });
 
-export const updateOrderItem = async (
-  id: string,
-  orderItemBody: IUpdateOrderItemBody
-) => {
-  return await prisma.orderItem.update({ where: { id }, data: orderItemBody });
+  return orders;
 };
 
 // Single or multiple orderItems for single order
@@ -41,10 +48,3 @@ export const updateOrderItem = async (
 
 //   return newOrder;
 // };
-
-export const updateOrder = async (
-  id: string,
-  data: Prisma.OrderUpdateInput
-) => {
-  return await prisma.order.update({ where: { id }, data });
-};

@@ -1,6 +1,10 @@
 import prisma from "../../config/db";
 import { Request, Response } from "express";
 import { randomUUID } from "crypto";
+import {
+  getProductByCategoryName,
+  getProductByProductName,
+} from "../../models/productModel";
 
 /**
  * Req body should
@@ -18,11 +22,11 @@ interface IProductBody {
 
 export const getProducts = async (req: Request, res: Response) => {
   // For product name params
-  const productName = req.query.productName;
+  const productName = req.query.productName as string;
 
   // For category params
-  const categoryParam = req.query.category;
-  const categoryName = req.query.categoryName;
+  const categoryParam = req.query.category as string;
+  const categoryName = req.query.categoryName as string;
 
   try {
     if (categoryName !== undefined) {
@@ -36,17 +40,7 @@ export const getProducts = async (req: Request, res: Response) => {
         return;
       }
 
-      const products = await prisma.product.findMany({
-        where: {
-          category: {
-            categoryName: categoryName.toString(),
-          },
-        },
-        include: {
-          category: true,
-        },
-      });
-
+      const products = await getProductByCategoryName(categoryName);
       res.json(products);
       return;
     }
@@ -63,11 +57,8 @@ export const getProducts = async (req: Request, res: Response) => {
     }
 
     if (productName !== undefined) {
-      const products = await prisma.product.findMany({
-        where: {
-          productName: { contains: productName.toString() },
-        },
-      });
+      console.log(productName);
+      const products = await getProductByProductName(productName);
       res.json(products);
       return;
     }
