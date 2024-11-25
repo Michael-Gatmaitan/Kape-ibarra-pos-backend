@@ -23,7 +23,8 @@ model Customer {
   lastname    String
   username    String   @unique
   password    String
-  email       String   @unique
+  email       String?  @unique
+  gender      String
   phoneNumber String?
   createdAt   DateTime @default(now())
   orders      Order[]
@@ -159,15 +160,15 @@ model Transaction {
 // }
 
 model Employee {
-  id        String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  role      Role    @relation(fields: [roleId], references: [id])
-  roleId    String  @db.Uuid
-  imagePath String?
-  firstname String
-  lastname  String
-  cpNum     String
-  username  String
-  password  String
+  id          String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  role        Role    @relation(fields: [roleId], references: [id])
+  roleId      String  @db.Uuid
+  imagePath   String?
+  firstname   String
+  lastname    String
+  phoneNumber String
+  username    String
+  password    String
 
   orders        Order[]
   ordersManaged Order[] @relation("OrderEmployee")

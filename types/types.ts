@@ -101,7 +101,7 @@ export interface IEmployee {
   roleId: string;
   firstname: string;
   lastname: string;
-  cpNum: string;
+  phoneNumber: string;
   username: string;
   password: string;
 }

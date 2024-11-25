@@ -1,4 +1,4 @@
-import express, { Application, NextFunction, Request, Response } from "express";
+import express, { Application, Request, Response } from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
@@ -26,7 +26,15 @@ const app: Application = express();
 const server = createServer(app);
 const io = new Server(server);
 
-io.on("connection", (socket) => console.log("Connected: ", socket.id));
+io.on("connection", (socket) => {
+  console.log("Connected: ", socket.id);
+
+  socket.on("count", (data, callback) => {
+    console.log(data);
+    callback("recieved");
+  });
+});
+io.on("count", (data) => console.log("HII!", data));
 
 app.use(express.json());
 app.use(cors());
@@ -79,7 +87,7 @@ app.use("/customer", customerRoute);
         id: "c65b9c9c-c016-4ef7-bfc6-c631cb7eaa9e",
         firstname: "System",
         lastname: "System",
-        cpNum: "System",
+        phoneNumber: "System",
         imagePath: "",
         username: "sys",
         password: "sys",
@@ -103,7 +111,7 @@ app.use("/customer", customerRoute);
         lastname: "Gatmaitan",
         username: "micheal29",
         password: "michealgatmaitan",
-        cpNum: "09499693314",
+        phoneNumber: "09499693314",
         role: {
           create: {
             roleName: "Admin",
@@ -125,6 +133,7 @@ app.use("/customer", customerRoute);
         username: "remvo123",
         password: "fidelrevo",
         phoneNumber: "09123456789",
+        gender: "Male",
       },
     });
   }
@@ -184,19 +193,23 @@ app.post("/login", async (req: Request, res: Response) => {
   res.json({ token });
 });
 
-app.post("/signup", async (req: Request, res: Response) => {
-  const body: ICreateEmployeeBody = req.body;
+// app.post("/signup", async (req: Request, res: Response) => {
+//   const body: ICreateEmployeeBody = req.body;
 
-  const newEmployee = await prisma.employee.create({
-    data: body,
-  });
+//   const newEmployee = await prisma.employee.create({
+//     data: body,
+//   });
 
-  console.log(newEmployee);
+//   console.log(newEmployee);
 
-  res.json(newEmployee);
-});
+//   res.json(newEmployee);
+// });
 
-app.listen(PORT, () => {
+// app.listen(PORT, () => {
+//   console.log(`Connected to port ${PORT}`);
+// });
+
+server.listen(PORT, () => {
   console.log(`Connected to port ${PORT}`);
 });
 
