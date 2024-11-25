@@ -15,6 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteProductById = exports.getProductById = exports.createProduct = exports.updateProductById = exports.getProducts = void 0;
 const db_1 = __importDefault(require("../../config/db"));
 const crypto_1 = require("crypto");
+const productModel_1 = require("../../models/productModel");
 const getProducts = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     // For product name params
     const productName = req.query.productName;
@@ -32,16 +33,7 @@ const getProducts = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
                 res.json(products);
                 return;
             }
-            const products = yield db_1.default.product.findMany({
-                where: {
-                    category: {
-                        categoryName: categoryName.toString(),
-                    },
-                },
-                include: {
-                    category: true,
-                },
-            });
+            const products = yield (0, productModel_1.getProductByCategoryName)(categoryName);
             res.json(products);
             return;
         }
@@ -55,11 +47,8 @@ const getProducts = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
             return;
         }
         if (productName !== undefined) {
-            const products = yield db_1.default.product.findMany({
-                where: {
-                    productName: { contains: productName.toString() },
-                },
-            });
+            console.log(productName);
+            const products = yield (0, productModel_1.getProductByProductName)(productName);
             res.json(products);
             return;
         }

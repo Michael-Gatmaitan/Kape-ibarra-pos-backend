@@ -17,7 +17,6 @@ export interface IExpense {
 
 export interface IInventory {
   id: string;
-  // branchId: string;
   rawMaterialId: string;
   quantityInUnit: number;
   stockQuantity: number;
@@ -27,22 +26,21 @@ export interface IInventory {
 export interface IOrder {
   id: string;
   orderedAt: string;
-  // branchId: string;
-  userId: string;
   customerId: string;
-  userNumber: string;
+  customerNumber: number;
   totalPrice: number;
   proofOfPaymentImg?: string;
   orderType: "walk-in" | "online";
   orderStatus: "preparing" | "payment pending" | "ready to pickup" | "rejected";
+  employeeId: string;
+  baristaId?: string;
 }
-
-// export type OrderCreate = Pick<IOrder, "branchId" | "userId">;
 
 export interface IOrderItem {
   id: string;
   orderId: string;
   productId: string;
+  recordedProductPrice: number;
   quantity: number;
   quantityAmount: number;
 }
@@ -83,7 +81,6 @@ export interface IRole {
 }
 export interface ITotalExpensesPerDay {
   id: string;
-  // branchId: string;
   days: number;
   date: string;
   totalExpenses: number;
@@ -91,14 +88,17 @@ export interface ITotalExpensesPerDay {
 export interface ITransaction {
   id: string;
   orderId: string;
-  // branchId: string;
   paymentMethod: string;
-  amountPaid: string;
+  totalAmount: number;
+  totalTendered: number;
+  change: number;
+  vatAmount?: number;
+  vatableSales: number;
+  transactionDate: string;
 }
 export interface IEmployee {
   id: string;
   roleId: string;
-  // branchId: string;
   firstname: string;
   lastname: string;
   cpNum: string;

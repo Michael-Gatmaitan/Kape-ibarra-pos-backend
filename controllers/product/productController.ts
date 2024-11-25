@@ -5,6 +5,7 @@ import {
   getProductByCategoryName,
   getProductByProductName,
 } from "../../models/productModel";
+import { Prisma } from "@prisma/client";
 
 /**
  * Req body should
@@ -29,7 +30,29 @@ export const getProducts = async (req: Request, res: Response) => {
   const categoryName = req.query.categoryName as string;
 
   try {
-    if (categoryName !== undefined) {
+    const p = await prisma.product.findMany({
+      where: {
+        AND: [
+          categoryName ? { category: { categoryName } } : {},
+          productName
+            ? {
+                productName: {
+                  contains: productName.toString(),
+                  mode: "insensitive",
+                },
+              }
+            : {},
+        ],
+      },
+      include: {
+        category: true,
+      },
+    });
+
+    res.json(p);
+    return;
+
+    if (categoryName) {
       if (categoryName === "all") {
         const products = await prisma.product.findMany({
           include: {

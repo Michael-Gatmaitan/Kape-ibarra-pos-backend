@@ -10,6 +10,9 @@ import { IUpdateOrderItemBody } from "../types/types";
 // Get
 export const getLastOrder = async () => {
   const order = await prisma.order.findMany({
+    select: {
+      customerNumber: true,
+    },
     orderBy: {
       customerNumber: "desc",
     },

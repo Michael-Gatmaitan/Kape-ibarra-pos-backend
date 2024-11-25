@@ -1,9 +1,31 @@
 import { Request, Response } from "express";
 import prisma from "../../config/db";
 
+// For barista, get the order and all of the order items in order
 export const getAllTransaction = async (req: Request, res: Response) => {
+  // barista=true
+  const order = req.query.order as string;
+
   console.log("getting transactions");
   try {
+    if (order === "true") {
+      const transactions = await prisma.transaction.findMany({
+        include: {
+          order: {
+            include: {
+              orderItems: {
+                include: {
+                  product: true,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      res.json(transactions);
+      return;
+    }
     const transactions = await prisma.transaction.findMany();
     console.log(transactions);
     res.json(transactions);

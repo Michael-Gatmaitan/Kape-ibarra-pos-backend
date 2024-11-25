@@ -119,6 +119,7 @@ export const createOrder = async (req: Request, res: Response) => {
   }
 };
 
+// * /order/[id]?updateType=confirmation
 export const updateOrderById = async (req: Request, res: Response) => {
   const id = req.params.id as string;
   const updateType = req.query.updateType;
@@ -164,6 +165,10 @@ export const updateOrderById = async (req: Request, res: Response) => {
   }
 };
 
+// * /order?lastOrder=true
+// * /order?employeeId=[id]
+// * /order?orderStatus=[preparing | payment pending | ready]
+
 export const getAllOrders = async (req: Request, res: Response) => {
   const employeeId = req.query.employeeId as string;
   const orderStatus = req.query.orderStatus as string;
@@ -177,7 +182,7 @@ export const getAllOrders = async (req: Request, res: Response) => {
     }
 
     // for returning last order
-    if (lastOrder) {
+    if (lastOrder === "true") {
       const order = await getLastOrder();
       res.json(order);
       return;

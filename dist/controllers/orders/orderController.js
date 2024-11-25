@@ -12,13 +12,19 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getOrderById = exports.getAllOrders = exports.createOrder = void 0;
+exports.getOrderById = exports.getAllOrders = exports.updateOrderById = exports.createOrder = void 0;
 const db_1 = __importDefault(require("../../config/db"));
 const transactionModel_1 = require("../../models/transactionModel");
+const orderModel_1 = require("../../models/orderModel");
+const systemEmpId = process.env.SYSTEM_EMPLOYEE_ID;
 /**
  *
  * @param orderBody
- *        { userId }
+ *        {
+ *          userId
+ *          status
+ *          orderType
+ *        }
  * @param orderItemsBody
  *        [{
  *          productId
@@ -38,23 +44,27 @@ const transactionModel_1 = require("../../models/transactionModel");
  */
 const createOrder = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     // transactionBody destructured
-    const { orderBody, orderItemsBody, transactionBody } = req.body;
-    const { employeeId, orderType } = orderBody;
-    const { totalAmount, totalTendered, change, paymentMethod } = transactionBody;
     try {
-        const newOrder = yield db_1.default.order.create({
-            data: {
-                employeeId,
-                totalPrice: totalAmount,
-                orderType,
-                orderItems: {
-                    createMany: {
-                        data: orderItemsBody,
+        const { orderBody, orderItemsBody } = req.body;
+        const { employeeId, orderStatus, orderType } = orderBody;
+        const { customerId } = orderBody;
+        // Only walk-ins have a transaction body since they are
+        // paid
+        if (orderType === "walk-in") {
+            const { totalAmount, totalTendered, change, paymentMethod } = req.body.transactionBody;
+            const newOrder = yield db_1.default.order.create({
+                data: {
+                    employeeId,
+                    totalPrice: totalAmount,
+                    orderStatus,
+                    orderType,
+                    orderItems: {
+                        createMany: {
+                            data: orderItemsBody,
+                        },
                     },
                 },
-            },
-        });
-        if (orderType === "walk-in") {
+            });
             const newTransaction = yield (0, transactionModel_1.createTransactionModel)({
                 orderId: newOrder.id,
                 change,
@@ -64,8 +74,33 @@ const createOrder = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
             });
             console.log("New transaction created: ", newTransaction);
             console.log("YOu just made order!!!", newOrder);
+            res.json(newOrder);
         }
-        res.json(newOrder);
+        else if (orderType === "online") {
+            const system = yield db_1.default.employee.findFirst({
+                where: {
+                    id: "c65b9c9c-c016-4ef7-bfc6-c631cb7eaa9e",
+                },
+            });
+            if (!system) {
+                res.json({ message: "System id not found" }).status(401);
+                return;
+            }
+            const newOrder = yield db_1.default.order.create({
+                data: {
+                    employeeId: system.id,
+                    customerId, // We have a customer id in online !!!
+                    orderStatus,
+                    orderType,
+                    orderItems: {
+                        createMany: {
+                            data: orderItemsBody,
+                        },
+                    },
+                },
+            });
+            res.json(newOrder);
+        }
     }
     catch (err) {
         console.log(err);
@@ -73,8 +108,66 @@ const createOrder = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
     }
 });
 exports.createOrder = createOrder;
-const getAllOrders = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const updateOrderById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const id = req.params.id;
+    const updateType = req.query.updateType;
     try {
+        const orderToUpdate = yield db_1.default.order.findFirst({ where: { id } });
+        if (!orderToUpdate) {
+            res
+                .json({ message: `Order to update with id of ${id} not found` })
+                .status(401);
+            return;
+        }
+        // This ensure that the order to update is from
+        // customer that ordered ONLINE
+        if (updateType &&
+            updateType === "confirmation" &&
+            orderToUpdate.orderType === "online" &&
+            orderToUpdate.employeeId === systemEmpId &&
+            orderToUpdate.orderStatus === "payment pending") {
+            const body = req.body;
+            const updatedOrder = yield db_1.default.order.update({
+                where: { id },
+                data: {
+                    employeeId: body.employeeId,
+                    orderStatus: "preparing",
+                },
+            });
+            res.json(updatedOrder);
+            return;
+        }
+        // ... for now, the only way to update the order is
+        // by confirming it by [cashier] after seeing POP
+    }
+    catch (err) {
+        res
+            .json({ message: `There was an error in updating order: ${err}` })
+            .status(401);
+    }
+});
+exports.updateOrderById = updateOrderById;
+const getAllOrders = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const employeeId = req.query.employeeId;
+    const orderStatus = req.query.orderStatus;
+    const lastOrder = req.query.lastOrder;
+    try {
+        if (employeeId) {
+            const orders = yield (0, orderModel_1.getOrderByEmployeeId)(employeeId);
+            res.json(orders);
+            return;
+        }
+        // for returning last order
+        if (lastOrder) {
+            const order = yield (0, orderModel_1.getLastOrder)();
+            res.json(order);
+            return;
+        }
+        if (["preparing", "payment pending", "ready"].includes(orderStatus)) {
+            const orders = yield (0, orderModel_1.getOrderByOrderStatus)(orderStatus);
+            res.json(orders);
+            return;
+        }
         const orders = yield db_1.default.order.findMany();
         res.json(orders);
     }
@@ -84,15 +177,15 @@ const getAllOrders = (req, res) => __awaiter(void 0, void 0, void 0, function* (
 });
 exports.getAllOrders = getAllOrders;
 const getOrderById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { id } = req.params;
-    const { orderItems, employee, customer } = req.query;
-    if (!id) {
-        res.json({ error: "Id is not defined" }).status(401);
-        return;
-    }
+    const id = req.params.id;
+    const { orderItems, employee, customer, employeeId } = req.query;
+    // if (!id) {
+    //   res.json({ error: "Id is not defined" }).status(401);
+    //   return;
+    // }
     try {
         const order = yield db_1.default.order.findFirst({
-            where: { id: id.toString() },
+            where: { id },
             include: {
                 orderItems: orderItems === "true"
                     ? {

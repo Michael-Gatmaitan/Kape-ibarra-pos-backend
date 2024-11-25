@@ -112,8 +112,6 @@ app.use("/customer", customerRoute);
         imagePath: "",
       },
     });
-  } else {
-    console.log("User exists: ", employee);
   }
 
   // Sample customer
