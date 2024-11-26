@@ -15,6 +15,18 @@ export interface IExpense {
   expenseAmount: number;
 }
 
+export interface ICustomer {
+  id: string;
+  firstname: string;
+  lastname: string;
+  username: string;
+  password: string;
+  email: string | null;
+  gender: string;
+  phoneNumber: string | null;
+  createdAt: Date;
+}
+
 export interface IInventory {
   id: string;
   rawMaterialId: string;
@@ -104,6 +116,7 @@ export interface IEmployee {
   phoneNumber: string;
   username: string;
   password: string;
+  createdAt: Date;
 }
 export interface IBatch {
   id: string;

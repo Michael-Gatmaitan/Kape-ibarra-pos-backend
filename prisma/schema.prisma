@@ -18,16 +18,17 @@ datasource db {
 
 // Experimental
 model Customer {
-  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id          String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   firstname   String
   lastname    String
-  username    String   @unique
+  username    String     @unique
   password    String
-  email       String?  @unique
+  email       String?    @unique
   gender      String
   phoneNumber String?
-  createdAt   DateTime @default(now())
+  createdAt   DateTime   @default(now())
   orders      Order[]
+  AuditLog    AuditLog[]
 }
 
 // Inventory
@@ -67,6 +68,13 @@ model Order {
   Employee     Employee      @relation(fields: [employeeId], references: [id])
 }
 
+model UserLog {
+  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  associatedId String    @db.Uuid
+  login        DateTime  @default(now())
+  logout       DateTime?
+}
+
 model OrderItem {
   id                   String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   order                Order   @relation(fields: [orderId], references: [id])
@@ -79,7 +87,19 @@ model OrderItem {
   // quantity * productPrice
 }
 
+// AuditLog
+
+model AuditLog {
+  id         String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  employeeId String? @db.Uuid
+  customerId String? @db.Uuid
+
+  Employee Employee? @relation(fields: [employeeId], references: [id])
+  Customer Customer? @relation(fields: [customerId], references: [id])
+}
+
 // Product Catergory
+
 model Category {
   id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   categoryName String
@@ -160,19 +180,21 @@ model Transaction {
 // }
 
 model Employee {
-  id          String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  role        Role    @relation(fields: [roleId], references: [id])
-  roleId      String  @db.Uuid
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  role        Role     @relation(fields: [roleId], references: [id])
+  roleId      String   @db.Uuid
   imagePath   String?
   firstname   String
   lastname    String
   phoneNumber String
   username    String
   password    String
+  createdAt   DateTime @default(now())
 
   orders        Order[]
-  ordersManaged Order[] @relation("OrderEmployee")
-  orderPrepared Order[] @relation("OrderBarista")
+  ordersManaged Order[]    @relation("OrderEmployee")
+  orderPrepared Order[]    @relation("OrderBarista")
+  AuditLog      AuditLog[]
 }
 
 model Batch {

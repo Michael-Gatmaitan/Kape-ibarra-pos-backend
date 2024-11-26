@@ -1,4 +1,4 @@
-import express, { Application, Request, Response } from "express";
+import express, { Application, NextFunction, Request, Response } from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
@@ -15,11 +15,13 @@ import transactionRoute from "./routes/transactionRoutes";
 import customerRoute from "./routes/customerRoutes";
 
 import prisma from "./config/db";
-import { generateToken } from "./auth/jwt";
+import { generateToken, generateTokenForCustomer } from "./auth/jwt";
 
 import { Server } from "socket.io";
 import { createServer } from "http";
-import { ICreateEmployeeBody } from "./types/types";
+import { ICreateEmployeeBody, ICustomer, IEmployee } from "./types/types";
+// import { authMiddleware } from "./middlewares/authMiddleware";
+import jwt, { JwtPayload, Secret } from "jsonwebtoken";
 
 const app: Application = express();
 
@@ -48,7 +50,45 @@ app.get("/", (req: Request, res: Response) => {
   res.json("Hello world");
 });
 
-app.use("/product", productRoute);
+app.use((req, res, next) => {
+  // res.locals.user = req.user;
+  // res.locals.authenticated = !req.user.anonymous;
+  next();
+});
+
+const SECRET_KEY: Secret = process.env.SECRET_KEY as string;
+
+function authMiddleware(requiredRole: string) {
+  return (req: Request, res: Response, next: NextFunction) => {
+    const token = req.headers.authorization;
+    if (!token) {
+      res.status(401).send("Unauthorized");
+      return;
+    }
+
+    jwt.verify(token, SECRET_KEY, (err, decoded) => {
+      if (err) {
+        res.status(401).send("Invalid token");
+        return;
+      }
+
+      const payload = decoded as JwtPayload & {
+        person: IEmployee | ICustomer;
+        roleName: string;
+      };
+
+      if (payload!.roleName !== requiredRole) {
+        res.status(403).send("Forbidden");
+        return;
+      }
+
+      // req.user = payload;
+      next();
+    });
+  };
+}
+
+app.use("/product", authMiddleware("customer"), productRoute);
 app.use("/category", categoryRoute);
 app.use("/order", orderRoute);
 app.use("/role", roleRoute);
@@ -131,7 +171,7 @@ app.use("/customer", customerRoute);
         firstname: "Fidel",
         lastname: "Revo",
         username: "remvo123",
-        password: "fidelrevo",
+        password: "fidelrevo123",
         phoneNumber: "09123456789",
         gender: "Male",
       },
@@ -174,36 +214,68 @@ app.use("/customer", customerRoute);
   }
 })();
 
+// app.post("/customer-login", (req: Request, res: Response) => {
+//   const body: { username: string; password: string } = req.body;
+// });
+
 app.post("/login", async (req: Request, res: Response) => {
   const body: { username: string; password: string } = req.body;
+  const loginType = req.query.loginType;
 
-  const employee = await prisma.employee.findFirst({
-    where: {
-      username: body.username,
-      password: body.password,
-    },
-  });
-
-  if (employee === null) {
-    res.json({ error: "User could not find" }).status(401);
+  if (!loginType) {
+    res.json({ error: "Login type indvalid" });
     return;
   }
 
-  const token = await generateToken(employee);
-  res.json({ token });
+  try {
+    if (loginType === "employee") {
+      const employee = await prisma.employee.findFirst({
+        where: {
+          username: body.username,
+          password: body.password,
+        },
+      });
+
+      if (employee === null) {
+        res.json({ error: "User could not find: employee" }).status(401);
+        return;
+      }
+
+      const token = await generateToken(employee);
+      res.json({ token });
+    } else if (loginType === "customer") {
+      const customer = await prisma.customer.findFirst({
+        where: {
+          username: body.username,
+          password: body.password,
+        },
+      });
+
+      if (customer === null) {
+        res.json({ error: "User could not find: customer" }).status(401);
+        return;
+      }
+
+      const token = await generateToken(customer);
+      console.log("Token for customer", token);
+      res.json({ token });
+    }
+  } catch (err) {
+    res.json({ message: "There was an error logging in" });
+  }
 });
 
-// app.post("/signup", async (req: Request, res: Response) => {
-//   const body: ICreateEmployeeBody = req.body;
+app.post("/signup", async (req: Request, res: Response) => {
+  const body: ICreateEmployeeBody = req.body;
 
-//   const newEmployee = await prisma.employee.create({
-//     data: body,
-//   });
+  const newEmployee = await prisma.employee.create({
+    data: body,
+  });
 
-//   console.log(newEmployee);
+  console.log(newEmployee);
 
-//   res.json(newEmployee);
-// });
+  res.json(newEmployee);
+});
 
 // app.listen(PORT, () => {
 //   console.log(`Connected to port ${PORT}`);

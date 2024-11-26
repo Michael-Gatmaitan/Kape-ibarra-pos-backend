@@ -51,6 +51,8 @@ export const createOrder = async (req: Request, res: Response) => {
 
     const { customerId } = orderBody;
 
+    console.log(req.body);
+
     // Only walk-ins have a transaction body since they are
     // paid
     if (orderType === "walk-in") {
