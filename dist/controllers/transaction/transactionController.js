@@ -14,9 +14,33 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.updateTransactionById = exports.getTransactionById = exports.createTransaction = exports.getAllTransaction = void 0;
 const db_1 = __importDefault(require("../../config/db"));
+// For barista, get the order and all of the order items in order
 const getAllTransaction = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    // barista=true
+    const order = req.query.order;
     console.log("getting transactions");
     try {
+        if (order === "true") {
+            const transactions = yield db_1.default.transaction.findMany({
+                include: {
+                    order: {
+                        include: {
+                            orderItems: {
+                                include: {
+                                    product: {
+                                        include: {
+                                            category: true,
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            });
+            res.json(transactions);
+            return;
+        }
         const transactions = yield db_1.default.transaction.findMany();
         console.log(transactions);
         res.json(transactions);

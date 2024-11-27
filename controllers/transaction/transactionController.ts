@@ -6,16 +6,29 @@ export const getAllTransaction = async (req: Request, res: Response) => {
   // barista=true
   const order = req.query.order as string;
 
+  const orderStatus = req.query.orderStatus as string;
+
   console.log("getting transactions");
   try {
     if (order === "true") {
       const transactions = await prisma.transaction.findMany({
+        where: {
+          order: orderStatus
+            ? {
+                orderStatus,
+              }
+            : undefined,
+        },
         include: {
           order: {
             include: {
               orderItems: {
                 include: {
-                  product: true,
+                  product: {
+                    include: {
+                      category: true,
+                    },
+                  },
                 },
               },
             },

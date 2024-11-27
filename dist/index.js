@@ -30,27 +30,37 @@ const db_1 = __importDefault(require("./config/db"));
 const jwt_1 = require("./auth/jwt");
 const socket_io_1 = require("socket.io");
 const http_1 = require("http");
+const authMiddleware_1 = require("./middlewares/authMiddleware");
 const app = (0, express_1.default)();
 const server = (0, http_1.createServer)(app);
 const io = new socket_io_1.Server(server);
-io.on("connection", (socket) => console.log("Connected: ", socket.id));
+io.on("connection", (socket) => {
+    console.log("Connected: ", socket.id);
+    socket.on("count", (data, callback) => {
+        console.log(data);
+        callback("recieved");
+    });
+});
+io.on("count", (data) => console.log("HII!", data));
 app.use(express_1.default.json());
 app.use((0, cors_1.default)());
 app.use((0, cookie_parser_1.default)());
 dotenv_1.default.config();
 const PORT = process.env.PORT || 9999;
-app.get("/", (req, res) => {
-    res.json("Hello world");
-});
-app.use("/product", productRoutes_1.default);
-app.use("/category", categoryRoutes_1.default);
-app.use("/order", orderRoutes_1.default);
-app.use("/role", roleRoutes_1.default);
-app.use("/raw-material", rawMaterialRoutes_1.default);
-app.use("/recipe", recipeRoutes_1.default);
-app.use("/employee", employeeRoutes_1.default);
-app.use("/transaction", transactionRoutes_1.default);
-app.use("/customer", customerRoutes_1.default);
+app.get("/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const products = yield db_1.default.product.findMany();
+    res.json(products);
+}));
+// authMiddleware(["admin", "customer"])
+app.use("/product", authMiddleware_1.auth, productRoutes_1.default);
+app.use("/category", authMiddleware_1.auth, categoryRoutes_1.default);
+app.use("/order", authMiddleware_1.auth, orderRoutes_1.default);
+app.use("/role", authMiddleware_1.auth, roleRoutes_1.default);
+app.use("/raw-material", authMiddleware_1.auth, rawMaterialRoutes_1.default);
+app.use("/recipe", authMiddleware_1.auth, recipeRoutes_1.default);
+app.use("/employee", authMiddleware_1.auth, employeeRoutes_1.default);
+app.use("/transaction", authMiddleware_1.auth, transactionRoutes_1.default);
+app.use("/customer", authMiddleware_1.auth, customerRoutes_1.default);
 (function () {
     return __awaiter(this, void 0, void 0, function* () {
         const role = yield db_1.default.role.findFirst({
@@ -77,7 +87,7 @@ app.use("/customer", customerRoutes_1.default);
                     id: "c65b9c9c-c016-4ef7-bfc6-c631cb7eaa9e",
                     firstname: "System",
                     lastname: "System",
-                    cpNum: "System",
+                    phoneNumber: "System",
                     imagePath: "",
                     username: "sys",
                     password: "sys",
@@ -99,7 +109,7 @@ app.use("/customer", customerRoutes_1.default);
                     lastname: "Gatmaitan",
                     username: "micheal29",
                     password: "michealgatmaitan",
-                    cpNum: "09499693314",
+                    phoneNumber: "09499693314",
                     role: {
                         create: {
                             roleName: "Admin",
@@ -108,9 +118,6 @@ app.use("/customer", customerRoutes_1.default);
                     imagePath: "",
                 },
             });
-        }
-        else {
-            console.log("User exists: ", employee);
         }
         // Sample customer
         const customer = yield db_1.default.customer.findFirst();
@@ -121,8 +128,9 @@ app.use("/customer", customerRoutes_1.default);
                     firstname: "Fidel",
                     lastname: "Revo",
                     username: "remvo123",
-                    password: "fidelrevo",
+                    password: "fidelrevo123",
                     phoneNumber: "09123456789",
+                    gender: "Male",
                 },
             });
         }
@@ -160,20 +168,50 @@ app.use("/customer", customerRoutes_1.default);
         }
     });
 })();
+// app.post("/customer-login", (req: Request, res: Response) => {
+//   const body: { username: string; password: string } = req.body;
+// });
 app.post("/login", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const body = req.body;
-    const employee = yield db_1.default.employee.findFirst({
-        where: {
-            username: body.username,
-            password: body.password,
-        },
-    });
-    if (employee === null) {
-        res.json({ error: "User could not find" }).status(401);
+    const loginType = req.query.loginType;
+    if (!loginType) {
+        res.json({ error: "Login type indvalid" });
         return;
     }
-    const token = yield (0, jwt_1.generateToken)(employee);
-    res.json({ token });
+    try {
+        if (loginType === "employee") {
+            const employee = yield db_1.default.employee.findFirst({
+                where: {
+                    username: body.username,
+                    password: body.password,
+                },
+            });
+            if (employee === null) {
+                res.json({ error: "User could not find: employee" }).status(401);
+                return;
+            }
+            const token = yield (0, jwt_1.generateToken)(employee);
+            res.json({ token });
+        }
+        else if (loginType === "customer") {
+            const customer = yield db_1.default.customer.findFirst({
+                where: {
+                    username: body.username,
+                    password: body.password,
+                },
+            });
+            if (customer === null) {
+                res.json({ error: "User could not find: customer" }).status(401);
+                return;
+            }
+            const token = yield (0, jwt_1.generateToken)(customer);
+            console.log("Token for customer", token);
+            res.json({ token });
+        }
+    }
+    catch (err) {
+        res.json({ message: "There was an error logging in" });
+    }
 }));
 app.post("/signup", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const body = req.body;
@@ -183,7 +221,10 @@ app.post("/signup", (req, res) => __awaiter(void 0, void 0, void 0, function* ()
     console.log(newEmployee);
     res.json(newEmployee);
 }));
-app.listen(PORT, () => {
+// app.listen(PORT, () => {
+//   console.log(`Connected to port ${PORT}`);
+// });
+server.listen(PORT, () => {
     console.log(`Connected to port ${PORT}`);
 });
 module.exports = app;

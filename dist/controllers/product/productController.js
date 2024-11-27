@@ -23,7 +23,27 @@ const getProducts = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
     const categoryParam = req.query.category;
     const categoryName = req.query.categoryName;
     try {
-        if (categoryName !== undefined) {
+        const p = yield db_1.default.product.findMany({
+            where: {
+                AND: [
+                    categoryName ? { category: { categoryName } } : {},
+                    productName
+                        ? {
+                            productName: {
+                                contains: productName.toString(),
+                                mode: "insensitive",
+                            },
+                        }
+                        : {},
+                ],
+            },
+            include: {
+                category: true,
+            },
+        });
+        res.json(p);
+        return;
+        if (categoryName) {
             if (categoryName === "all") {
                 const products = yield db_1.default.product.findMany({
                     include: {

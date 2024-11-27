@@ -3,7 +3,7 @@ import {
   createEmployee,
   getAllEmployee,
   getEmployeeById,
-} from "../controllers/user/employeeController";
+} from "../controllers/employee/employeeController";
 
 const route: Router = express.Router();
 

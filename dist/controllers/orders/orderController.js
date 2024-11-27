@@ -46,8 +46,9 @@ const createOrder = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
     // transactionBody destructured
     try {
         const { orderBody, orderItemsBody } = req.body;
-        const { employeeId, orderStatus, orderType } = orderBody;
+        const { employeeId, orderStatus, orderType, diningOption } = orderBody;
         const { customerId } = orderBody;
+        console.log(req.body);
         // Only walk-ins have a transaction body since they are
         // paid
         if (orderType === "walk-in") {
@@ -58,6 +59,7 @@ const createOrder = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
                     totalPrice: totalAmount,
                     orderStatus,
                     orderType,
+                    diningOption,
                     orderItems: {
                         createMany: {
                             data: orderItemsBody,
@@ -92,6 +94,7 @@ const createOrder = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
                     customerId, // We have a customer id in online !!!
                     orderStatus,
                     orderType,
+                    diningOption,
                     orderItems: {
                         createMany: {
                             data: orderItemsBody,
@@ -108,6 +111,7 @@ const createOrder = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
     }
 });
 exports.createOrder = createOrder;
+// * /order/[id]?updateType=confirmation
 const updateOrderById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const id = req.params.id;
     const updateType = req.query.updateType;
@@ -147,6 +151,9 @@ const updateOrderById = (req, res) => __awaiter(void 0, void 0, void 0, function
     }
 });
 exports.updateOrderById = updateOrderById;
+// * /order?lastOrder=true
+// * /order?employeeId=[id]
+// * /order?orderStatus=[preparing | payment pending | ready]
 const getAllOrders = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const employeeId = req.query.employeeId;
     const orderStatus = req.query.orderStatus;
@@ -158,7 +165,7 @@ const getAllOrders = (req, res) => __awaiter(void 0, void 0, void 0, function* (
             return;
         }
         // for returning last order
-        if (lastOrder) {
+        if (lastOrder === "true") {
             const order = yield (0, orderModel_1.getLastOrder)();
             res.json(order);
             return;

@@ -36,8 +36,9 @@ model Inventory {
   id                  String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   rawMaterial         RawMaterial          @relation(fields: [rawMaterialId], references: [id])
   rawMaterialId       String               @db.Uuid
-  quantityInUnit      Int
   stockQuantity       Int
+  quantityInUnit      Int
+  reorderLevel        Int
   isReorderNeeded     Boolean
   batches             Batch[]
   systemNotifications SystemNotification[]
@@ -55,6 +56,7 @@ model Order {
   orderStatus       String   @default("preparing") // preparing, payment pending, ready to pickup, rejected
   proofOfPaymentImg String? //
   orderType         String // 'walk-in', 'online'
+  diningOption      String
   baristaId         String?  @db.Uuid
 
   customer Customer? @relation(fields: [customerId], references: [id])
@@ -93,6 +95,9 @@ model AuditLog {
   id         String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   employeeId String? @db.Uuid
   customerId String? @db.Uuid
+
+  timeIn  DateTime @default(now())
+  timeOut DateTime @updatedAt
 
   Employee Employee? @relation(fields: [employeeId], references: [id])
   Customer Customer? @relation(fields: [customerId], references: [id])
@@ -138,6 +143,7 @@ model RawMaterial {
   rawPrice              Float
   inventores            Inventory[]
   recipes               Recipe[]
+  Batch                 Batch[]
 }
 
 // Recipe
@@ -149,7 +155,6 @@ model Recipe {
   rawMaterial             RawMaterial @relation(fields: [rawMaterialId], references: [id])
   rawMaterialId           String      @db.Uuid
   quantityInUnitPcsNeeded Int
-  rawCost                 Float       @default(0)
 }
 
 // Role
@@ -197,17 +202,20 @@ model Employee {
   AuditLog      AuditLog[]
 }
 
+model EWallet {
+  id          String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  phoneNumber String
+  name        String
+}
+
 model Batch {
-  id                  String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  inventory           Inventory @relation(fields: [inventoryId], references: [id])
-  inventoryId         String    @db.Uuid
-  batchQuantity       Int
-  expirationDate      DateTime
-  recievedDate        DateTime
-  daysUntilExpiration Int // This could generate in frontend
-  notifWarning        Boolean // Triggers to true when daysUntilExpiration is < 10
-  isExpired           Boolean
-  isDisposed          Boolean
+  id             String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  inventory      Inventory   @relation(fields: [inventoryId], references: [id])
+  inventoryId    String      @db.Uuid
+  rawMaterialId  String      @db.Uuid
+  rawMaterial    RawMaterial @relation(fields: [rawMaterialId], references: [id])
+  batchQuantity  Int
+  expirationDate DateTime
 }
 
 model SystemNotification {
@@ -215,7 +223,7 @@ model SystemNotification {
   inventory        Inventory @relation(fields: [inventoryId], references: [id])
   inventoryId      String    @db.Uuid
   notificationDate DateTime
-  stauts           String
+  status           String
   isSolved         Boolean
   createdAt        DateTime  @default(now())
 }

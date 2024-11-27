@@ -52,43 +52,43 @@ export const getProducts = async (req: Request, res: Response) => {
     res.json(p);
     return;
 
-    if (categoryName) {
-      if (categoryName === "all") {
-        const products = await prisma.product.findMany({
-          include: {
-            category: true,
-          },
-        });
-        res.json(products);
-        return;
-      }
+    // if (categoryName) {
+    //   if (categoryName === "all") {
+    //     const products = await prisma.product.findMany({
+    //       include: {
+    //         category: true,
+    //       },
+    //     });
+    //     res.json(products);
+    //     return;
+    //   }
 
-      const products = await getProductByCategoryName(categoryName);
-      res.json(products);
-      return;
-    }
+    //   const products = await getProductByCategoryName(categoryName);
+    //   res.json(products);
+    //   return;
+    // }
 
-    if (categoryParam === "true") {
-      const products = await prisma.product.findMany({
-        include: {
-          category: true,
-        },
-      });
+    // if (categoryParam === "true") {
+    //   const products = await prisma.product.findMany({
+    //     include: {
+    //       category: true,
+    //     },
+    //   });
 
-      res.json(products);
-      return;
-    }
+    //   res.json(products);
+    //   return;
+    // }
 
-    if (productName !== undefined) {
-      console.log(productName);
-      const products = await getProductByProductName(productName);
-      res.json(products);
-      return;
-    }
+    // if (productName !== undefined) {
+    //   console.log(productName);
+    //   const products = await getProductByProductName(productName);
+    //   res.json(products);
+    //   return;
+    // }
 
-    const products = await prisma.product.findMany();
+    // const products = await prisma.product.findMany();
 
-    res.json(products);
+    // res.json(products);
   } catch (err) {
     res.json({ error: `There was an error fetching product: ${err}` });
   }

@@ -20,6 +20,9 @@ const db_1 = __importDefault(require("../config/db"));
 // Get
 const getLastOrder = () => __awaiter(void 0, void 0, void 0, function* () {
     const order = yield db_1.default.order.findMany({
+        select: {
+            customerNumber: true,
+        },
         orderBy: {
             customerNumber: "desc",
         },

@@ -47,7 +47,7 @@ export const createOrder = async (req: Request, res: Response) => {
 
   try {
     const { orderBody, orderItemsBody }: ICreateOrderSelf = req.body;
-    const { employeeId, orderStatus, orderType } = orderBody;
+    const { employeeId, orderStatus, orderType, diningOption } = orderBody;
 
     const { customerId } = orderBody;
 
@@ -65,6 +65,7 @@ export const createOrder = async (req: Request, res: Response) => {
           totalPrice: totalAmount,
           orderStatus,
           orderType,
+          diningOption,
 
           orderItems: {
             createMany: {
@@ -104,6 +105,7 @@ export const createOrder = async (req: Request, res: Response) => {
           customerId, // We have a customer id in online !!!
           orderStatus,
           orderType,
+          diningOption,
 
           orderItems: {
             createMany: {
@@ -140,7 +142,7 @@ export const updateOrderById = async (req: Request, res: Response) => {
     // customer that ordered ONLINE
     if (
       updateType &&
-      updateType === "confirmation" &&
+      updateType === "payment_confirmation" &&
       orderToUpdate.orderType === "online" &&
       orderToUpdate.employeeId === systemEmpId &&
       orderToUpdate.orderStatus === "payment pending"
@@ -153,6 +155,24 @@ export const updateOrderById = async (req: Request, res: Response) => {
           orderStatus: "preparing",
         },
       });
+
+      res.json(updatedOrder);
+      return;
+    } else if (
+      updateType &&
+      updateType === "mark_as_done" &&
+      orderToUpdate.orderStatus === "preparing"
+    ) {
+      const { baristaId } = req.body;
+      const updatedOrder = await prisma.order.update({
+        where: { id },
+        data: {
+          orderStatus: "ready",
+          baristaId,
+        },
+      });
+
+      console.log(`Order of ${updatedOrder.id} marked as done`);
 
       res.json(updatedOrder);
       return;

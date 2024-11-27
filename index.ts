@@ -20,8 +20,7 @@ import { generateToken, generateTokenForCustomer } from "./auth/jwt";
 import { Server } from "socket.io";
 import { createServer } from "http";
 import { ICreateEmployeeBody, ICustomer, IEmployee } from "./types/types";
-// import { authMiddleware } from "./middlewares/authMiddleware";
-import jwt, { JwtPayload, Secret } from "jsonwebtoken";
+import { auth, authMiddleware } from "./middlewares/authMiddleware";
 
 const app: Application = express();
 
@@ -36,6 +35,7 @@ io.on("connection", (socket) => {
     callback("recieved");
   });
 });
+
 io.on("count", (data) => console.log("HII!", data));
 
 app.use(express.json());
@@ -46,57 +46,21 @@ dotenv.config();
 
 const PORT = process.env.PORT || 9999;
 
-app.get("/", (req: Request, res: Response) => {
-  res.json("Hello world");
+app.get("/", async (req: Request, res: Response) => {
+  const products = await prisma.product.findMany();
+  res.json(products);
 });
 
-app.use((req, res, next) => {
-  // res.locals.user = req.user;
-  // res.locals.authenticated = !req.user.anonymous;
-  next();
-});
-
-const SECRET_KEY: Secret = process.env.SECRET_KEY as string;
-
-function authMiddleware(requiredRole: string) {
-  return (req: Request, res: Response, next: NextFunction) => {
-    const token = req.headers.authorization;
-    if (!token) {
-      res.status(401).send("Unauthorized");
-      return;
-    }
-
-    jwt.verify(token, SECRET_KEY, (err, decoded) => {
-      if (err) {
-        res.status(401).send("Invalid token");
-        return;
-      }
-
-      const payload = decoded as JwtPayload & {
-        person: IEmployee | ICustomer;
-        roleName: string;
-      };
-
-      if (payload!.roleName !== requiredRole) {
-        res.status(403).send("Forbidden");
-        return;
-      }
-
-      // req.user = payload;
-      next();
-    });
-  };
-}
-
-app.use("/product", authMiddleware("customer"), productRoute);
-app.use("/category", categoryRoute);
-app.use("/order", orderRoute);
-app.use("/role", roleRoute);
-app.use("/raw-material", rawMaterialRoute);
-app.use("/recipe", recipeRoute);
-app.use("/employee", employeeRoute);
-app.use("/transaction", transactionRoute);
-app.use("/customer", customerRoute);
+// authMiddleware(["admin", "customer"])
+app.use("/product", auth, productRoute);
+app.use("/category", auth, categoryRoute);
+app.use("/order", auth, orderRoute);
+app.use("/role", auth, roleRoute);
+app.use("/raw-material", auth, rawMaterialRoute);
+app.use("/recipe", auth, recipeRoute);
+app.use("/employee", auth, employeeRoute);
+app.use("/transaction", auth, transactionRoute);
+app.use("/customer", auth, customerRoute);
 
 (async function () {
   const role = await prisma.role.findFirst({
