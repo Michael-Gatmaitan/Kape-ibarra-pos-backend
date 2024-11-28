@@ -8,11 +8,12 @@ import {
   getOrderByEmployeeId,
   getOrderByOrderStatus,
 } from "../../models/orderModel";
+import { deductInventory } from "../../models/depletionModel";
 
 const systemEmpId = process.env.SYSTEM_EMPLOYEE_ID!;
 interface ICreateOrderSelf {
   orderBody: ICreateOrderBody;
-  orderItemsBody: Prisma.OrderItemCreateManyInput;
+  orderItemsBody: Prisma.OrderItemCreateManyInput[];
   transactionBody: Prisma.TransactionUncheckedCreateInput;
 }
 
@@ -85,6 +86,9 @@ export const createOrder = async (req: Request, res: Response) => {
 
       console.log("New transaction created: ", newTransaction);
       console.log("YOu just made order!!!", newOrder);
+
+      //
+      deductInventory(orderItemsBody);
 
       res.json(newOrder);
     } else if (orderType === "online") {

@@ -117,6 +117,8 @@ export const updateProductById = async (req: Request, res: Response) => {
 
   console.log(productBody);
 
+  console.log("Before", recipeBody);
+
   recipeBody = recipeBody.map((recipe) => {
     return {
       id: recipe.id,
@@ -127,53 +129,70 @@ export const updateProductById = async (req: Request, res: Response) => {
     };
   });
 
+  console.log(recipeBody);
+
   try {
     const currentProductImagePath = (
       await prisma.product.findFirst({ where: { id } })
     )?.imagePath;
-    const updatedProduct = await prisma.product.update({
-      where: { id },
-      data: {
-        // ...productBody,
-        productName: productBody.productName,
-        description: productBody.description,
-        categoryId: productBody.categoryId,
-        imagePath:
-          productBody.imagePath === ""
-            ? currentProductImagePath
-            : productBody.imagePath,
-        price: productBody.price,
-        recipes: {
-          upsert: recipeBody.map((recipe) => ({
-            where: { id: recipe.id || randomUUID() },
-            update: {
-              rawMaterialId: recipe.rawMaterialId,
-              quantityInUnitPcsNeeded: recipe.quantityInUnitPcsNeeded,
-            },
-            create: {
-              id: recipe.id,
-              rawMaterialId: recipe.rawMaterialId,
-              quantityInUnitPcsNeeded: recipe.quantityInUnitPcsNeeded,
-            },
-          })),
-          deleteMany: {
-            id: { notIn: recipeBody.map((r) => r.id).filter(Boolean) },
-          },
-        },
-      },
-      include: {
-        recipes: true,
-      },
-    });
+    // const updatedProduct = await prisma.product.update({
+    //   where: { id },
+    //   data: {
+    //     productName: productBody.productName,
+    //     description: productBody.description,
+    //     categoryId: productBody.categoryId,
+    //     imagePath:
+    //       productBody.imagePath === ""
+    //         ? currentProductImagePath
+    //         : productBody.imagePath,
+    //     price: productBody.price,
+    //     recipes: {
+    //       upsert: recipeBody.map((recipe) => ({
+    //         where: { id: recipe.id ?? randomUUID() }, // Use randomUUID() if id is missing
+    //         update: {
+    //           rawMaterialId: recipe.rawMaterialId,
+    //           quantityInUnitPcsNeeded: recipe.quantityInUnitPcsNeeded,
+    //         },
+    //         create: {
+    //           id: recipe.id || randomUUID(), // Ensure UUID generation if id is null/undefined
+    //           rawMaterialId: recipe.rawMaterialId,
+    //           quantityInUnitPcsNeeded: recipe.quantityInUnitPcsNeeded,
+    //         },
+    //       })),
+    //       deleteMany: {
+    //         id: { notIn: recipeBody.map((r) => r.id).filter(Boolean) },
+    //       },
+    //     },
+    //   },
+    //   include: {
+    //     recipes: true,
+    //   },
+    // });
+    // const updatedProduct = await prisma.product.upsert({
 
-    console.log("Update: ", updatedProduct);
-    res.json(updatedProduct);
+    // })
+
+    // console.log("Update: ", updatedProduct);
+    // res.json(updatedProduct);
+    res.json({ message: "hotdog" });
     return;
   } catch (err) {
-    res.status(500).json({ error: "Error in updating product with recipes" });
+    res
+      .json({ error: `Error in updating product with recipes ${err}` })
+      .status(500);
     return;
   }
 };
+
+// "Error in updating product with recipes PrismaClientKnownRequestError:
+// Invalid `prisma.product.update()` invocation in
+// C:\Users\Michael\Desktop\Projects\ibarra_pos\backend\controllers\product\productController.ts:138:49
+
+//   135 const currentProductImagePath = (
+//   136   await prisma.product.findFirst({ where: { id } })
+//   137 )?.imagePath;
+// → 138 const updatedProduct = await prisma.product.update(
+// Inconsistent column data: Error creating UUID, invalid length: expected length 32 for simple format, found 0"
 
 export const createProduct = async (req: Request, res: Response) => {
   let { productBody, recipeBody } = req.body;
@@ -270,7 +289,9 @@ export const deleteProductById = async (req: Request, res: Response) => {
     res.json(deletedProduct);
     return;
   } catch (err) {
-    res.status(403).json({ error: "Error has occured in deleting product" });
+    res
+      .status(403)
+      .json({ error: `Error has occured in deleting product ${err}` });
     return;
   }
 };

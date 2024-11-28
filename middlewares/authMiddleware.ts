@@ -38,7 +38,6 @@ export function authMiddleware(requiredRole: Role[]) {
 
 export function auth(req: Request, res: Response, next: NextFunction) {
   const token = req.headers.authorization;
-  console.log(token);
 
   if (!token) {
     res.status(401).json({ message: "Unauthorized" });
@@ -60,7 +59,7 @@ export function auth(req: Request, res: Response, next: NextFunction) {
       res.status(403).json({ message: "Forbidden" });
     }
 
-    console.log("User valid: ", payload);
+    // console.log("User valid: ", payload);
 
     next();
   });

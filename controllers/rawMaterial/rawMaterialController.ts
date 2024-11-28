@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import prisma from "../../config/db";
 import { ICreateRawMaterialBody } from "../../types/types";
+import { createInventoryWithNewBatch } from "../../models/inventoryModel";
 
 export const getRawMaterials = async (req: Request, res: Response) => {
   const result = await prisma.rawMaterial.findMany();
@@ -29,13 +30,25 @@ export const getRawMaterialById = async (req: Request, res: Response) => {
   }
 };
 
+// interface ICreateRawMaterialBody
+
 export const createRawMaterial = async (req: Request, res: Response) => {
   // Search for the raw materials first if it is EXISTED
   // if not, create it.
-  const body = req.body;
+
+  const body = req.body as ICreateRawMaterialBody & {
+    batchQuantity: number;
+    reorderLevel: number;
+    expirationDate: string;
+  };
 
   body.quantityInUnitPerItem = parseInt(body.quantityInUnitPerItem.toString());
   body.rawPrice = parseInt(body.rawPrice.toString());
+
+  body.batchQuantity = parseInt(body.batchQuantity.toString());
+  body.reorderLevel = parseInt(body.reorderLevel.toString());
+  // body.batchQuantity
+  // body.expirationDate
 
   const rawMaterialExists = (
     await prisma.rawMaterial.findFirst({
@@ -51,9 +64,34 @@ export const createRawMaterial = async (req: Request, res: Response) => {
 
   // Create raw material
   try {
-    console.log(body);
+    const {
+      // For creating raw material
+      rawPrice,
+      materialName,
+      quantityInUnitPerItem,
+
+      // For creating inventory and batch
+      batchQuantity,
+      expirationDate,
+      reorderLevel,
+    } = body;
+
     const newRawMaterial = await prisma.rawMaterial.create({
-      data: body,
+      data: {
+        rawPrice,
+        materialName,
+        quantityInUnitPerItem,
+      },
+    });
+
+    // Create inventory here
+
+    createInventoryWithNewBatch({
+      rawMaterialId: newRawMaterial.id,
+      reorderLevel: reorderLevel,
+      batchQuantity: batchQuantity,
+      quantityInUnitPerItem: newRawMaterial.quantityInUnitPerItem,
+      expirationDate: expirationDate,
     });
 
     res.json(newRawMaterial);
@@ -69,7 +107,7 @@ export const updateRawMaterialById = async (req: Request, res: Response) => {
 
   rawMaterialBody.rawPrice = parseInt(rawMaterialBody.rawPrice.toString());
   rawMaterialBody.quantityInUnitPerItem = parseInt(
-    rawMaterialBody.quantityInUnitPerItem.toString(),
+    rawMaterialBody.quantityInUnitPerItem.toString()
   );
 
   const { materialName, rawPrice, quantityInUnitPerItem } = rawMaterialBody;

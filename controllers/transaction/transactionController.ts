@@ -5,8 +5,8 @@ import prisma from "../../config/db";
 export const getAllTransaction = async (req: Request, res: Response) => {
   // barista=true
   const order = req.query.order as string;
-
   const orderStatus = req.query.orderStatus as string;
+  const orderBy = req.query.orderBy as string;
 
   console.log("getting transactions");
   try {
@@ -34,6 +34,18 @@ export const getAllTransaction = async (req: Request, res: Response) => {
             },
           },
         },
+        orderBy:
+          orderBy === "time"
+            ? {
+                // order: {
+                //   orderedAt: orderBy === "time" ? true : false,
+
+                // }
+                order: {
+                  orderedAt: "desc",
+                },
+              }
+            : undefined,
       });
 
       res.json(transactions);

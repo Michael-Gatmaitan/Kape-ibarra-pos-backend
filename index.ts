@@ -13,6 +13,7 @@ import recipeRoute from "./routes/recipeRoutes";
 import employeeRoute from "./routes/employeeRoutes";
 import transactionRoute from "./routes/transactionRoutes";
 import customerRoute from "./routes/customerRoutes";
+import batchRoute from "./routes/batchRoutes";
 
 import prisma from "./config/db";
 import { generateToken, generateTokenForCustomer } from "./auth/jwt";
@@ -61,6 +62,7 @@ app.use("/recipe", auth, recipeRoute);
 app.use("/employee", auth, employeeRoute);
 app.use("/transaction", auth, transactionRoute);
 app.use("/customer", auth, customerRoute);
+app.use("/batch", auth, batchRoute);
 
 (async function () {
   const role = await prisma.role.findFirst({
