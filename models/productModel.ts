@@ -39,9 +39,29 @@ export const getProductByProductName = async (productName: string) => {
   return products;
 };
 
-export const getProductByCategoryNameAndProductName = async (
-  categoryName: string,
-  productName: string
+// export const getProductByCategoryNameAndProductName = async (
+//   categoryName: string,
+//   productName: string
+// ) => {
+//   const products = await prisma.product.findMany();
+// };
+
+export const updateProductAvailability = async (
+  productId: string,
+  availability: boolean
 ) => {
-  const products = await prisma.product.findMany();
+  try {
+    const updatedProduct = await prisma.product.update({
+      where: { id: productId },
+      data: {
+        isAvailable: availability,
+      },
+    });
+
+    console.log("AVAILABILITY: ", updatedProduct);
+
+    return updatedProduct;
+  } catch (err) {
+    console.log(`Error updating availability of the product: ${err}`);
+  }
 };

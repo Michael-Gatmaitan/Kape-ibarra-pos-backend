@@ -14,9 +14,11 @@ import employeeRoute from "./routes/employeeRoutes";
 import transactionRoute from "./routes/transactionRoutes";
 import customerRoute from "./routes/customerRoutes";
 import batchRoute from "./routes/batchRoutes";
+import inventoryRoute from "./routes/inventoryRoutes";
+import auditLogRoute from "./routes/auditLogRoutes";
 
 import prisma from "./config/db";
-import { generateToken, generateTokenForCustomer } from "./auth/jwt";
+import { generateToken } from "./auth/jwt";
 
 import { Server } from "socket.io";
 import { createServer } from "http";
@@ -63,6 +65,8 @@ app.use("/employee", auth, employeeRoute);
 app.use("/transaction", auth, transactionRoute);
 app.use("/customer", auth, customerRoute);
 app.use("/batch", auth, batchRoute);
+app.use("/inventory", auth, inventoryRoute);
+app.use("/audit-log", auth, auditLogRoute);
 
 (async function () {
   const role = await prisma.role.findFirst({
@@ -144,8 +148,8 @@ app.use("/batch", auth, batchRoute);
     });
   }
 
-  const categories = await prisma.category.findMany();
-  if (categories.length !== 3) {
+  const category = await prisma.category.findFirst();
+  if (!category) {
     await prisma.category.createMany({
       data: [
         { categoryName: "Coffee" },

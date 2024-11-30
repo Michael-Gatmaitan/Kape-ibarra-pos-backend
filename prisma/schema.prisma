@@ -121,6 +121,7 @@ model Product {
   productName String
   price       Float
   description String?
+  isAvailable Boolean     @default(false)
   createdAt   DateTime    @default(now())
   recipes     Recipe[]
   orderItems  OrderItem[]

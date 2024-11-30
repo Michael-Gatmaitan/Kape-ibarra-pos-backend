@@ -40,14 +40,21 @@ export const createBatch = async (req: Request, res: Response) => {
       return;
     }
 
+    const inventoryStockQuantity = inventory.stockQuantity + batchQuantity;
+    const inventoryQuantityUnit =
+      inventory.quantityInUnit +
+      rawMaterial.quantityInUnitPerItem * batchQuantity;
+
+    const inventoryIsReorderNeeded =
+      inventoryStockQuantity < inventory.reorderLevel;
+
     // update here
     const updatedInventory = await prisma.inventory.update({
       where: { id: inventory.id },
       data: {
-        stockQuantity: inventory.stockQuantity + batchQuantity,
-        quantityInUnit:
-          inventory.quantityInUnit +
-          rawMaterial.quantityInUnitPerItem * batchQuantity,
+        stockQuantity: inventoryStockQuantity,
+        quantityInUnit: inventoryQuantityUnit,
+        isReorderNeeded: inventoryIsReorderNeeded,
 
         batches: {
           create: {

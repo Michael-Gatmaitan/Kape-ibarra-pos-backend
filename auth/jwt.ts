@@ -1,7 +1,8 @@
 import prisma from "../config/db";
 import { Request, Response, NextFunction } from "express";
 import { ICustomer, IEmployee } from "../types/types";
-import jwt, { Secret } from "jsonwebtoken";
+import jwt, { JwtPayload, Secret } from "jsonwebtoken";
+import { Role } from "@prisma/client";
 
 const SECRET_KEY: Secret = process.env.SECRET_KEY as string;
 
@@ -33,30 +34,21 @@ export const verifyToken = (
     if (error) res.status(403).json({ error: "Invalid  token" });
 
     console.log("Validated");
+    res.json({});
     next();
   });
 };
 
-export const generateTokenForCustomer = async (customer: ICustomer) => {
-  return jwt.sign({ customer }, SECRET_KEY);
-};
+export const decrpytToken = async (token: string) => {
+  // let payload: { person: IEmployee | ICustomer; roleName: Role };
 
-export const verifyTokenForCustomer = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  const token = req.headers["authorization"];
+  let payload = jwt.verify(token, SECRET_KEY, (err, decoded) => {
+    if (err) {
+      return "Invalid token";
+    }
 
-  if (!token) {
-    res.status(401).json({ error: "Access denied" });
-    return;
-  }
-
-  jwt.verify(token, SECRET_KEY, (error, decoded) => {
-    if (error) res.status(403).json({ error: "Access denied" });
-    console.log("Customer validated");
-
-    next();
+    return decoded;
   });
+
+  return payload;
 };

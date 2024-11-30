@@ -70,6 +70,7 @@ export interface IProduct {
   catergoryId: string;
   // -- PLU0
   productName: string;
+  isAvailable: boolean;
   price: number;
   description?: string;
   createdAt: string;
@@ -135,6 +136,14 @@ export interface ISystemNotification {
   notificationDate: string;
   stauts: string;
   isSolved: boolean;
+}
+
+export interface IAuditLog {
+  id: string;
+  customerId?: string;
+  employeeId?: string;
+  timeIn: Date;
+  timeOut: Date;
 }
 
 // export type ICreateBranchBody = Prisma.BranchUncheckedCreateInput;

@@ -40,6 +40,10 @@ const handleDeduction = async (productId: string, quantity: number) => {
     const updatedStockQuantity = Math.floor(
       inv.quantityInUnit / rawMaterial.quantityInUnitPerItem
     );
+
+    if (updatedStockQuantity < inv.reorderLevel) {
+    }
+
     const updated = await prisma.inventory.update({
       where: { id: inv.id },
       data: {
@@ -47,6 +51,7 @@ const handleDeduction = async (productId: string, quantity: number) => {
           decrement: quantityToDeduct,
         },
         stockQuantity: updatedStockQuantity,
+        isReorderNeeded: updatedStockQuantity < inv.reorderLevel,
       },
     });
 

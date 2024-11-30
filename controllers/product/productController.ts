@@ -4,6 +4,7 @@ import { randomUUID } from "crypto";
 import {
   getProductByCategoryName,
   getProductByProductName,
+  updateProductAvailability,
 } from "../../models/productModel";
 import { Prisma } from "@prisma/client";
 
@@ -46,6 +47,9 @@ export const getProducts = async (req: Request, res: Response) => {
       },
       include: {
         category: true,
+      },
+      orderBy: {
+        createdAt: "asc",
       },
     });
 
@@ -95,6 +99,20 @@ export const getProducts = async (req: Request, res: Response) => {
 };
 
 export const updateProductById = async (req: Request, res: Response) => {
+  const id = req.params.id as string;
+
+  const updateAvailability = req.query.updateAvailability as string;
+
+  if (updateAvailability === "true") {
+    const updatedProduct = await updateProductAvailability(id, true);
+    res.json(updatedProduct);
+    return;
+  } else if (updateAvailability === "false") {
+    const updatedProduct = await updateProductAvailability(id, false);
+    res.json(updatedProduct);
+    return;
+  }
+
   let {
     productBody,
     recipeBody,
@@ -110,8 +128,6 @@ export const updateProductById = async (req: Request, res: Response) => {
   // if (productBody.imagePath === "") [
 
   // ]
-
-  const id = req.params.id as string;
 
   productBody.price = parseInt(productBody.price.toString());
 
@@ -227,6 +243,8 @@ export const createProduct = async (req: Request, res: Response) => {
   const newProduct = await prisma.product.create({
     data: {
       ...productBody,
+      isAvailable: true,
+
       recipes: {
         createMany: {
           data: recipeBody,

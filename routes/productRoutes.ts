@@ -6,7 +6,6 @@ import {
   getProductById,
   updateProductById,
 } from "../controllers/product/productController";
-// import { verifyToken } from "../auth/jwt";
 
 const router: Router = express.Router();
 
