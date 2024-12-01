@@ -4,42 +4,25 @@ import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 
 // Routes
-import orderRoute from "./routes/orderRoutes";
-import productRoute from "./routes/productRoutes";
-import categoryRoute from "./routes/categoryRoutes";
-import roleRoute from "./routes/roleRoutes";
-import rawMaterialRoute from "./routes/rawMaterialRoutes";
-import recipeRoute from "./routes/recipeRoutes";
-import employeeRoute from "./routes/employeeRoutes";
-import transactionRoute from "./routes/transactionRoutes";
-import customerRoute from "./routes/customerRoutes";
-import batchRoute from "./routes/batchRoutes";
-import inventoryRoute from "./routes/inventoryRoutes";
-import auditLogRoute from "./routes/auditLogRoutes";
+import orderRoute from "../routes/orderRoutes";
+import productRoute from "../routes/productRoutes";
+import categoryRoute from "../routes/categoryRoutes";
+import roleRoute from "../routes/roleRoutes";
+import rawMaterialRoute from "../routes/rawMaterialRoutes";
+import recipeRoute from "../routes/recipeRoutes";
+import employeeRoute from "../routes/employeeRoutes";
+import transactionRoute from "../routes/transactionRoutes";
+import customerRoute from "../routes/customerRoutes";
+import batchRoute from "../routes/batchRoutes";
+import inventoryRoute from "../routes/inventoryRoutes";
+import auditLogRoute from "../routes/auditLogRoutes";
 
-import prisma from "./config/db";
-import { generateToken } from "./auth/jwt";
-
-import { Server } from "socket.io";
-import { createServer } from "http";
-import { ICreateEmployeeBody, ICustomer, IEmployee } from "./types/types";
-import { auth, authMiddleware } from "./middlewares/authMiddleware";
+import prisma from "../config/db";
+import { generateToken } from "../auth/jwt";
+import { ICreateEmployeeBody } from "../types/types";
+import { auth } from "../middlewares/authMiddleware";
 
 const app: Application = express();
-
-const server = createServer(app);
-const io = new Server(server);
-
-io.on("connection", (socket) => {
-  console.log("Connected: ", socket.id);
-
-  socket.on("count", (data, callback) => {
-    console.log(data);
-    callback("recieved");
-  });
-});
-
-io.on("count", (data) => console.log("HII!", data));
 
 app.use(express.json());
 app.use(cors());
@@ -251,8 +234,4 @@ app.post("/signup", async (req: Request, res: Response) => {
 //   console.log(`Connected to port ${PORT}`);
 // });
 
-server.listen(PORT, () => {
-  console.log(`Connected to port ${PORT}`);
-});
-
-module.exports = app;
+export default app;
