@@ -14,7 +14,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getProductByCategoryNameAndProductName = exports.getProductByProductName = exports.getProductByCategoryName = void 0;
+exports.updateProductAvailability = exports.getProductByProductName = exports.getProductByCategoryName = void 0;
 const db_1 = __importDefault(require("../config/db"));
 // export const createProductWithCategory = async ({
 //   data,
@@ -47,7 +47,25 @@ const getProductByProductName = (productName) => __awaiter(void 0, void 0, void 
     return products;
 });
 exports.getProductByProductName = getProductByProductName;
-const getProductByCategoryNameAndProductName = (categoryName, productName) => __awaiter(void 0, void 0, void 0, function* () {
-    const products = yield db_1.default.product.findMany();
+// export const getProductByCategoryNameAndProductName = async (
+//   categoryName: string,
+//   productName: string
+// ) => {
+//   const products = await prisma.product.findMany();
+// };
+const updateProductAvailability = (productId, availability) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const updatedProduct = yield db_1.default.product.update({
+            where: { id: productId },
+            data: {
+                isAvailable: availability,
+            },
+        });
+        console.log("AVAILABILITY: ", updatedProduct);
+        return updatedProduct;
+    }
+    catch (err) {
+        console.log(`Error updating availability of the product: ${err}`);
+    }
 });
-exports.getProductByCategoryNameAndProductName = getProductByCategoryNameAndProductName;
+exports.updateProductAvailability = updateProductAvailability;

@@ -31,7 +31,6 @@ function authMiddleware(requiredRole) {
 }
 function auth(req, res, next) {
     const token = req.headers.authorization;
-    console.log(token);
     if (!token) {
         res.status(401).json({ message: "Unauthorized" });
         return;
@@ -46,7 +45,7 @@ function auth(req, res, next) {
         if (!((_a = payload === null || payload === void 0 ? void 0 : payload.person) === null || _a === void 0 ? void 0 : _a.id)) {
             res.status(403).json({ message: "Forbidden" });
         }
-        console.log("User valid: ", payload);
+        // console.log("User valid: ", payload);
         next();
     });
 }

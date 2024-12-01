@@ -16,6 +16,7 @@ exports.getOrderById = exports.getAllOrders = exports.updateOrderById = exports.
 const db_1 = __importDefault(require("../../config/db"));
 const transactionModel_1 = require("../../models/transactionModel");
 const orderModel_1 = require("../../models/orderModel");
+const depletionModel_1 = require("../../models/depletionModel");
 const systemEmpId = process.env.SYSTEM_EMPLOYEE_ID;
 /**
  *
@@ -76,6 +77,8 @@ const createOrder = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
             });
             console.log("New transaction created: ", newTransaction);
             console.log("YOu just made order!!!", newOrder);
+            //
+            (0, depletionModel_1.deductInventory)(orderItemsBody);
             res.json(newOrder);
         }
         else if (orderType === "online") {
@@ -126,7 +129,7 @@ const updateOrderById = (req, res) => __awaiter(void 0, void 0, void 0, function
         // This ensure that the order to update is from
         // customer that ordered ONLINE
         if (updateType &&
-            updateType === "confirmation" &&
+            updateType === "payment_confirmation" &&
             orderToUpdate.orderType === "online" &&
             orderToUpdate.employeeId === systemEmpId &&
             orderToUpdate.orderStatus === "payment pending") {
@@ -138,6 +141,21 @@ const updateOrderById = (req, res) => __awaiter(void 0, void 0, void 0, function
                     orderStatus: "preparing",
                 },
             });
+            res.json(updatedOrder);
+            return;
+        }
+        else if (updateType &&
+            updateType === "mark_as_done" &&
+            orderToUpdate.orderStatus === "preparing") {
+            const { baristaId } = req.body;
+            const updatedOrder = yield db_1.default.order.update({
+                where: { id },
+                data: {
+                    orderStatus: "ready",
+                    baristaId,
+                },
+            });
+            console.log(`Order of ${updatedOrder.id} marked as done`);
             res.json(updatedOrder);
             return;
         }

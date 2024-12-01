@@ -14,6 +14,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteRawMaterialById = exports.updateRawMaterialById = exports.createRawMaterial = exports.getRawMaterialById = exports.getRawMaterials = void 0;
 const db_1 = __importDefault(require("../../config/db"));
+const inventoryModel_1 = require("../../models/inventoryModel");
 const getRawMaterials = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const result = yield db_1.default.rawMaterial.findMany();
     res.json(result);
@@ -39,13 +40,18 @@ const getRawMaterialById = (req, res) => __awaiter(void 0, void 0, void 0, funct
     }
 });
 exports.getRawMaterialById = getRawMaterialById;
+// interface ICreateRawMaterialBody
 const createRawMaterial = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a;
     // Search for the raw materials first if it is EXISTED
     // if not, create it.
+    var _a;
     const body = req.body;
     body.quantityInUnitPerItem = parseInt(body.quantityInUnitPerItem.toString());
     body.rawPrice = parseInt(body.rawPrice.toString());
+    body.batchQuantity = parseInt(body.batchQuantity.toString());
+    body.reorderLevel = parseInt(body.reorderLevel.toString());
+    // body.batchQuantity
+    // body.expirationDate
     const rawMaterialExists = (_a = (yield db_1.default.rawMaterial.findFirst({
         where: { materialName: body.materialName },
     }))) === null || _a === void 0 ? void 0 : _a.id;
@@ -56,9 +62,25 @@ const createRawMaterial = (req, res) => __awaiter(void 0, void 0, void 0, functi
     }
     // Create raw material
     try {
-        console.log(body);
+        const { 
+        // For creating raw material
+        rawPrice, materialName, quantityInUnitPerItem, 
+        // For creating inventory and batch
+        batchQuantity, expirationDate, reorderLevel, } = body;
         const newRawMaterial = yield db_1.default.rawMaterial.create({
-            data: body,
+            data: {
+                rawPrice,
+                materialName,
+                quantityInUnitPerItem,
+            },
+        });
+        // Create inventory here
+        (0, inventoryModel_1.createInventoryWithNewBatch)({
+            rawMaterialId: newRawMaterial.id,
+            reorderLevel: reorderLevel,
+            batchQuantity: batchQuantity,
+            quantityInUnitPerItem: newRawMaterial.quantityInUnitPerItem,
+            expirationDate: expirationDate,
         });
         res.json(newRawMaterial);
     }

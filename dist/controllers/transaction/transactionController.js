@@ -18,10 +18,19 @@ const db_1 = __importDefault(require("../../config/db"));
 const getAllTransaction = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     // barista=true
     const order = req.query.order;
+    const orderStatus = req.query.orderStatus;
+    const orderBy = req.query.orderBy;
     console.log("getting transactions");
     try {
         if (order === "true") {
             const transactions = yield db_1.default.transaction.findMany({
+                where: {
+                    order: orderStatus
+                        ? {
+                            orderStatus,
+                        }
+                        : undefined,
+                },
                 include: {
                     order: {
                         include: {
@@ -37,6 +46,16 @@ const getAllTransaction = (req, res) => __awaiter(void 0, void 0, void 0, functi
                         },
                     },
                 },
+                orderBy: orderBy === "time"
+                    ? {
+                        // order: {
+                        //   orderedAt: orderBy === "time" ? true : false,
+                        // }
+                        order: {
+                            orderedAt: "desc",
+                        },
+                    }
+                    : undefined,
             });
             res.json(transactions);
             return;
