@@ -25,6 +25,14 @@ export const getLastOrder = async () => {
 export const getOrderByOrderStatus = async (orderStatus: string) => {
   const orders = await prisma.order.findMany({
     where: { orderStatus },
+    include: {
+      customer: true,
+      orderItems: {
+        include: {
+          product: true,
+        },
+      },
+    },
   });
 
   return orders;
@@ -36,6 +44,57 @@ export const getOrderByEmployeeId = async (employeeId: string) => {
   });
 
   return orders;
+};
+
+export const createOnlineOrder = async ({
+  customerId,
+  orderStatus,
+  orderType,
+  diningOption,
+  proofOfPaymentImg,
+  orderItemsBody,
+}: {
+  customerId: string | null | undefined;
+  orderStatus: string | undefined;
+  orderType: string;
+  diningOption: string;
+  proofOfPaymentImg: string | null | undefined;
+  orderItemsBody: Prisma.OrderItemCreateManyInput[];
+}) => {
+  try {
+    const system = await prisma.employee.findFirst({
+      where: { id: "c65b9c9c-c016-4ef7-bfc6-c631cb7eaa9e" },
+    });
+
+    if (!system) {
+      return { message: "System id not found" };
+    }
+
+    console.log("payment url", proofOfPaymentImg);
+
+    const newOrder = await prisma.order.create({
+      data: {
+        employeeId: system.id,
+        customerId, // We have a customer id in online !!!
+        orderStatus,
+        orderType,
+        diningOption,
+        proofOfPaymentImg,
+
+        orderItems: {
+          createMany: {
+            data: orderItemsBody,
+          },
+        },
+      },
+    });
+
+    return newOrder;
+  } catch (err) {
+    const errResult = `There was an error creating online order: ${err}`;
+    console.log(errResult);
+    return { message: errResult };
+  }
 };
 
 // Single or multiple orderItems for single order

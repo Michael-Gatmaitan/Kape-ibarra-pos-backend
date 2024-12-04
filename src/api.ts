@@ -1,4 +1,4 @@
-import express, { Application, NextFunction, Request, Response } from "express";
+import express, { Application, Request, Response } from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
@@ -16,6 +16,7 @@ import customerRoute from "../routes/customerRoutes";
 import batchRoute from "../routes/batchRoutes";
 import inventoryRoute from "../routes/inventoryRoutes";
 import auditLogRoute from "../routes/auditLogRoutes";
+import eWalletRoute from "../routes/eWalletRoutes";
 
 import prisma from "../config/db";
 import { generateToken } from "../auth/jwt";
@@ -50,6 +51,7 @@ app.use("/customer", auth, customerRoute);
 app.use("/batch", auth, batchRoute);
 app.use("/inventory", auth, inventoryRoute);
 app.use("/audit-log", auth, auditLogRoute);
+app.use("/e-wallet", auth, eWalletRoute);
 
 // (async function () {
 // seed
@@ -118,8 +120,8 @@ app.post("/signup", async (req: Request, res: Response) => {
   res.json(newEmployee);
 });
 
-// app.listen(PORT, () => {
-//   console.log(`Connected to port ${PORT}`);
-// });
+app.listen(PORT, () => {
+  console.log(`Connected to port ${PORT}`);
+});
 
 export default app;

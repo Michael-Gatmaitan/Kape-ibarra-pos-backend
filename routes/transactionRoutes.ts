@@ -1,6 +1,6 @@
 import express, { Router, Request, Response } from "express";
-import prisma from "../config/db";
 import {
+  createTransaction,
   getAllTransaction,
   getTransactionById,
   updateTransactionById,
@@ -10,6 +10,7 @@ const route: Router = express.Router();
 
 // get transaction
 route.get("/", getAllTransaction);
+route.post("/", createTransaction);
 
 // get transaction by its id
 route.get("/:id", getTransactionById);

@@ -1,23 +1,36 @@
 import prisma from "../config/db";
 
+async function deleteAllData() {
+  await prisma.transaction.deleteMany();
+  await prisma.orderItem.deleteMany();
+  await prisma.order.deleteMany();
+  await prisma.product.deleteMany();
+
+  await prisma.batch.deleteMany();
+  await prisma.inventory.deleteMany();
+  await prisma.rawMaterial.deleteMany();
+
+  await prisma.customer.deleteMany();
+  await prisma.employee.deleteMany();
+  await prisma.role.deleteMany();
+}
+
 async function seedDatabase() {
-  const role = await prisma.role.findFirst({
-    where: {
-      roleName: { in: ["Cashier", "Barista", "Customer"] },
-    },
-  });
+  await deleteAllData();
 
-  if (!role?.id) {
-    await prisma.role.createMany({
-      data: [
-        { roleName: "Manager" },
-        { roleName: "Cashier" },
-        { roleName: "Barista" },
-      ],
-    });
+  // const role = await prisma.role.findFirst({
+  //   where: {
+  //     roleName: { in: ["cashier", "barista", "customer"] },
+  //   },
+  // });
 
-    console.log("Roles created");
-  }
+  // if (!role?.id) {
+  //   await prisma.role.createMany({
+  //     data: [{ roleName: "cashier" }, { roleName: "barista" }],
+  //   });
+
+  //   console.log("Roles created");
+  // }
 
   const systemPh = await prisma.employee.findFirst({
     where: { id: "c65b9c9c-c016-4ef7-bfc6-c631cb7eaa9e" },
@@ -56,10 +69,42 @@ async function seedDatabase() {
         phoneNumber: "09499693314",
         role: {
           create: {
-            roleName: "Admin",
+            roleName: "admin",
           },
         },
         imagePath: "",
+      },
+    });
+
+    await prisma.employee.create({
+      data: {
+        firstname: "John rhey",
+        lastname: "Dela cute",
+        username: "jearjearjear",
+        password: "jearjearjear",
+        phoneNumber: "09123456789",
+        imagePath: "",
+        role: {
+          create: {
+            roleName: "barista",
+          },
+        },
+      },
+    });
+
+    await prisma.employee.create({
+      data: {
+        firstname: "John doe",
+        lastname: "Zuckerburg",
+        username: "cashiercashier",
+        password: "cashiercashier",
+        phoneNumber: "09123456789",
+        imagePath: "",
+        role: {
+          create: {
+            roleName: "cashier",
+          },
+        },
       },
     });
   }
@@ -91,29 +136,29 @@ async function seedDatabase() {
     });
   }
 
-  const rawMaterials = await prisma.rawMaterial.findFirst();
-  if (!rawMaterials?.id) {
-    await prisma.rawMaterial.createMany({
-      data: [
-        { materialName: "Milk", quantityInUnitPerItem: 1000, rawPrice: 100 },
-        {
-          materialName: "Coffee grounds",
-          quantityInUnitPerItem: 1000,
-          rawPrice: 800,
-        },
-        {
-          materialName: "Whip Cream",
-          quantityInUnitPerItem: 1000,
-          rawPrice: 120,
-        },
-        { materialName: "Cups", quantityInUnitPerItem: 50, rawPrice: 50 },
-        { materialName: "Straw", quantityInUnitPerItem: 50, rawPrice: 50 },
-        { materialName: "Water", quantityInUnitPerItem: 5000, rawPrice: 30 },
-      ],
-    });
+  // const rawMaterials = await prisma.rawMaterial.findFirst();
+  // if (!rawMaterials?.id) {
+  //   await prisma.rawMaterial.createMany({
+  //     data: [
+  //       { materialName: "Milk", quantityInUnitPerItem: 1000, rawPrice: 100 },
+  //       {
+  //         materialName: "Coffee grounds",
+  //         quantityInUnitPerItem: 1000,
+  //         rawPrice: 800,
+  //       },
+  //       {
+  //         materialName: "Whip Cream",
+  //         quantityInUnitPerItem: 1000,
+  //         rawPrice: 120,
+  //       },
+  //       { materialName: "Cups", quantityInUnitPerItem: 50, rawPrice: 50 },
+  //       { materialName: "Straw", quantityInUnitPerItem: 50, rawPrice: 50 },
+  //       { materialName: "Water", quantityInUnitPerItem: 5000, rawPrice: 30 },
+  //     ],
+  //   });
 
-    console.log("Raw materials created");
-  }
+  //   console.log("Raw materials created");
+  // }
 }
 
 seedDatabase()

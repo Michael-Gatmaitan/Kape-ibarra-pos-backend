@@ -16,7 +16,38 @@ const express_1 = __importDefault(require("express"));
 const db_1 = __importDefault(require("../config/db"));
 const router = express_1.default.Router();
 router.get("/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const roles = ["admin", "cashier", "barista", "customer"];
+    const roleParam = req.query.role;
     try {
+        console.log(roles.includes(roleParam), roleParam);
+        if (roleParam && roles.includes(roleParam)) {
+            const auditLogs = yield db_1.default.auditLog.findMany({
+                where: roleParam === "customer"
+                    ? {
+                        customerId: { not: null },
+                    }
+                    : {
+                        employeeId: {
+                            not: null,
+                        },
+                        Employee: {
+                            role: {
+                                roleName: roleParam,
+                            },
+                        },
+                    },
+                include: roleParam === "customer"
+                    ? {
+                        Customer: true,
+                    }
+                    : {
+                        Employee: true,
+                    },
+            });
+            console.log(auditLogs);
+            res.json(auditLogs);
+            return;
+        }
         const auditLogs = yield db_1.default.auditLog.findMany({
             include: {
                 Employee: true,

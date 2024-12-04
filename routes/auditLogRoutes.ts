@@ -4,7 +4,43 @@ import prisma from "../config/db";
 const router: Router = express.Router();
 
 router.get("/", async (req: Request, res: Response) => {
+  const roles = ["admin", "cashier", "barista", "customer"];
+  const roleParam = req.query.role as string;
+
   try {
+    console.log(roles.includes(roleParam), roleParam);
+    if (roleParam && roles.includes(roleParam)) {
+      const auditLogs = await prisma.auditLog.findMany({
+        where:
+          roleParam === "customer"
+            ? {
+                customerId: { not: null },
+              }
+            : {
+                employeeId: {
+                  not: null,
+                },
+                Employee: {
+                  role: {
+                    roleName: roleParam,
+                  },
+                },
+              },
+        include:
+          roleParam === "customer"
+            ? {
+                Customer: true,
+              }
+            : {
+                Employee: true,
+              },
+      });
+
+      console.log(auditLogs);
+      res.json(auditLogs);
+      return;
+    }
+
     const auditLogs = await prisma.auditLog.findMany({
       include: {
         Employee: true,

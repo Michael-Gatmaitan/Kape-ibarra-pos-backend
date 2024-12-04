@@ -4,12 +4,19 @@ import { Response, Request } from "express";
 import { ICreateCategoryBody } from "../../types/types";
 
 export const getCategories = async (req: Request, res: Response) => {
-  const categories = await prisma.category.findMany({
-    include: {
-      products: true,
-    },
-  });
-  res.json(categories).status(200);
+  try {
+    const categories = await prisma.category.findMany({
+      include: {
+        products: true,
+      },
+    });
+    res.json(categories).status(200);
+  } catch (err) {
+    console.log(`There was an error getting all categories: ${err}`);
+    res
+      .json({ message: `There was an error getting all categories: ${err}` })
+      .status(401);
+  }
 };
 
 export const getCategoryById = async (req: Request, res: Response) => {

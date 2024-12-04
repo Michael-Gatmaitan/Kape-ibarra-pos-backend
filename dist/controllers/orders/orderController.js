@@ -45,11 +45,11 @@ const systemEmpId = process.env.SYSTEM_EMPLOYEE_ID;
  */
 const createOrder = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     // transactionBody destructured
+    // const orderType = req.query.orderType as string;
     try {
         const { orderBody, orderItemsBody } = req.body;
-        const { employeeId, orderStatus, orderType, diningOption } = orderBody;
+        const { employeeId, orderStatus, orderType, diningOption, proofOfPaymentImg, } = orderBody;
         const { customerId } = orderBody;
-        console.log(req.body);
         // Only walk-ins have a transaction body since they are
         // paid
         if (orderType === "walk-in") {
@@ -61,6 +61,7 @@ const createOrder = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
                     orderStatus,
                     orderType,
                     diningOption,
+                    proofOfPaymentImg,
                     orderItems: {
                         createMany: {
                             data: orderItemsBody,
@@ -82,28 +83,13 @@ const createOrder = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
             res.json(newOrder);
         }
         else if (orderType === "online") {
-            const system = yield db_1.default.employee.findFirst({
-                where: {
-                    id: "c65b9c9c-c016-4ef7-bfc6-c631cb7eaa9e",
-                },
-            });
-            if (!system) {
-                res.json({ message: "System id not found" }).status(401);
-                return;
-            }
-            const newOrder = yield db_1.default.order.create({
-                data: {
-                    employeeId: system.id,
-                    customerId, // We have a customer id in online !!!
-                    orderStatus,
-                    orderType,
-                    diningOption,
-                    orderItems: {
-                        createMany: {
-                            data: orderItemsBody,
-                        },
-                    },
-                },
+            const newOrder = (0, orderModel_1.createOnlineOrder)({
+                customerId,
+                orderStatus,
+                orderType,
+                diningOption,
+                proofOfPaymentImg,
+                orderItemsBody,
             });
             res.json(newOrder);
         }
@@ -141,6 +127,7 @@ const updateOrderById = (req, res) => __awaiter(void 0, void 0, void 0, function
                     orderStatus: "preparing",
                 },
             });
+            console.log("Updated online order: ", updatedOrder);
             res.json(updatedOrder);
             return;
         }

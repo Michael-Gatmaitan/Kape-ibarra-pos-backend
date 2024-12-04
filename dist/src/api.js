@@ -29,6 +29,7 @@ const customerRoutes_1 = __importDefault(require("../routes/customerRoutes"));
 const batchRoutes_1 = __importDefault(require("../routes/batchRoutes"));
 const inventoryRoutes_1 = __importDefault(require("../routes/inventoryRoutes"));
 const auditLogRoutes_1 = __importDefault(require("../routes/auditLogRoutes"));
+const eWalletRoutes_1 = __importDefault(require("../routes/eWalletRoutes"));
 const db_1 = __importDefault(require("../config/db"));
 const jwt_1 = require("../auth/jwt");
 const authMiddleware_1 = require("../middlewares/authMiddleware");
@@ -55,113 +56,10 @@ app.use("/customer", authMiddleware_1.auth, customerRoutes_1.default);
 app.use("/batch", authMiddleware_1.auth, batchRoutes_1.default);
 app.use("/inventory", authMiddleware_1.auth, inventoryRoutes_1.default);
 app.use("/audit-log", authMiddleware_1.auth, auditLogRoutes_1.default);
-(function () {
-    return __awaiter(this, void 0, void 0, function* () {
-        const role = yield db_1.default.role.findFirst({
-            where: {
-                roleName: { in: ["Cashier", "Barista", "Customer"] },
-            },
-        });
-        if (!(role === null || role === void 0 ? void 0 : role.id)) {
-            yield db_1.default.role.createMany({
-                data: [
-                    { roleName: "Manager" },
-                    { roleName: "Cashier" },
-                    { roleName: "Barista" },
-                ],
-            });
-            console.log("Roles created");
-        }
-        const systemPh = yield db_1.default.employee.findFirst({
-            where: { id: "c65b9c9c-c016-4ef7-bfc6-c631cb7eaa9e" },
-        });
-        if (!systemPh) {
-            yield db_1.default.employee.create({
-                data: {
-                    id: "c65b9c9c-c016-4ef7-bfc6-c631cb7eaa9e",
-                    firstname: "System",
-                    lastname: "System",
-                    phoneNumber: "System",
-                    imagePath: "",
-                    username: "sys",
-                    password: "sys",
-                    role: {
-                        create: {
-                            roleName: "System",
-                        },
-                    },
-                },
-            });
-        }
-        const employee = yield db_1.default.employee.findFirst({
-            where: { username: "micheal29" },
-        });
-        if (!(employee === null || employee === void 0 ? void 0 : employee.id)) {
-            yield db_1.default.employee.create({
-                data: {
-                    firstname: "Michael",
-                    lastname: "Gatmaitan",
-                    username: "micheal29",
-                    password: "michealgatmaitan",
-                    phoneNumber: "09499693314",
-                    role: {
-                        create: {
-                            roleName: "Admin",
-                        },
-                    },
-                    imagePath: "",
-                },
-            });
-        }
-        // Sample customer
-        const customer = yield db_1.default.customer.findFirst();
-        if (!customer) {
-            yield db_1.default.customer.create({
-                data: {
-                    email: "fidelrevo@gmail.com",
-                    firstname: "Fidel",
-                    lastname: "Revo",
-                    username: "remvo123",
-                    password: "fidelrevo123",
-                    phoneNumber: "09123456789",
-                    gender: "Male",
-                },
-            });
-        }
-        const category = yield db_1.default.category.findFirst();
-        if (!category) {
-            yield db_1.default.category.createMany({
-                data: [
-                    { categoryName: "Coffee" },
-                    { categoryName: "Non-Coffee" },
-                    { categoryName: "Milk tea" },
-                ],
-            });
-        }
-        const rawMaterials = yield db_1.default.rawMaterial.findFirst();
-        if (!(rawMaterials === null || rawMaterials === void 0 ? void 0 : rawMaterials.id)) {
-            yield db_1.default.rawMaterial.createMany({
-                data: [
-                    { materialName: "Milk", quantityInUnitPerItem: 1000, rawPrice: 100 },
-                    {
-                        materialName: "Coffee grounds",
-                        quantityInUnitPerItem: 1000,
-                        rawPrice: 800,
-                    },
-                    {
-                        materialName: "Whip Cream",
-                        quantityInUnitPerItem: 1000,
-                        rawPrice: 120,
-                    },
-                    { materialName: "Cups", quantityInUnitPerItem: 50, rawPrice: 50 },
-                    { materialName: "Straw", quantityInUnitPerItem: 50, rawPrice: 50 },
-                    { materialName: "Water", quantityInUnitPerItem: 5000, rawPrice: 30 },
-                ],
-            });
-            console.log("Raw materials created");
-        }
-    });
-})();
+app.use("/e-wallet", authMiddleware_1.auth, eWalletRoutes_1.default);
+// (async function () {
+// seed
+// })();
 // app.post("/customer-login", (req: Request, res: Response) => {
 //   const body: { username: string; password: string } = req.body;
 // });
@@ -215,7 +113,7 @@ app.post("/signup", (req, res) => __awaiter(void 0, void 0, void 0, function* ()
     console.log(newEmployee);
     res.json(newEmployee);
 }));
-// app.listen(PORT, () => {
-//   console.log(`Connected to port ${PORT}`);
-// });
+app.listen(PORT, () => {
+    console.log(`Connected to port ${PORT}`);
+});
 exports.default = app;

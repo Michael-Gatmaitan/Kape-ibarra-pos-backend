@@ -8,6 +8,7 @@ const transactionController_1 = require("../controllers/transaction/transactionC
 const route = express_1.default.Router();
 // get transaction
 route.get("/", transactionController_1.getAllTransaction);
+route.post("/", transactionController_1.createTransaction);
 // get transaction by its id
 route.get("/:id", transactionController_1.getTransactionById);
 // update

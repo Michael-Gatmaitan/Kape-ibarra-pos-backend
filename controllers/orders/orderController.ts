@@ -4,6 +4,7 @@ import { Prisma } from "@prisma/client";
 import { ICreateOrderBody } from "../../types/types";
 import { createTransactionModel } from "../../models/transactionModel";
 import {
+  createOnlineOrder,
   getLastOrder,
   getOrderByEmployeeId,
   getOrderByOrderStatus,
@@ -45,14 +46,19 @@ interface ICreateOrderSelf {
 
 export const createOrder = async (req: Request, res: Response) => {
   // transactionBody destructured
+  // const orderType = req.query.orderType as string;
 
   try {
     const { orderBody, orderItemsBody }: ICreateOrderSelf = req.body;
-    const { employeeId, orderStatus, orderType, diningOption } = orderBody;
+    const {
+      employeeId,
+      orderStatus,
+      orderType,
+      diningOption,
+      proofOfPaymentImg,
+    } = orderBody;
 
     const { customerId } = orderBody;
-
-    console.log(req.body);
 
     // Only walk-ins have a transaction body since they are
     // paid
@@ -67,6 +73,7 @@ export const createOrder = async (req: Request, res: Response) => {
           orderStatus,
           orderType,
           diningOption,
+          proofOfPaymentImg,
 
           orderItems: {
             createMany: {
@@ -92,31 +99,13 @@ export const createOrder = async (req: Request, res: Response) => {
 
       res.json(newOrder);
     } else if (orderType === "online") {
-      const system = await prisma.employee.findFirst({
-        where: {
-          id: "c65b9c9c-c016-4ef7-bfc6-c631cb7eaa9e",
-        },
-      });
-
-      if (!system) {
-        res.json({ message: "System id not found" }).status(401);
-        return;
-      }
-
-      const newOrder = await prisma.order.create({
-        data: {
-          employeeId: system.id,
-          customerId, // We have a customer id in online !!!
-          orderStatus,
-          orderType,
-          diningOption,
-
-          orderItems: {
-            createMany: {
-              data: orderItemsBody,
-            },
-          },
-        },
+      const newOrder = createOnlineOrder({
+        customerId,
+        orderStatus,
+        orderType,
+        diningOption,
+        proofOfPaymentImg,
+        orderItemsBody,
       });
 
       res.json(newOrder);
@@ -159,6 +148,8 @@ export const updateOrderById = async (req: Request, res: Response) => {
           orderStatus: "preparing",
         },
       });
+
+      console.log("Updated online order: ", updatedOrder);
 
       res.json(updatedOrder);
       return;

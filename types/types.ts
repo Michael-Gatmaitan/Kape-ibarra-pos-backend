@@ -146,24 +146,14 @@ export interface IAuditLog {
   timeOut: Date;
 }
 
-// export type ICreateBranchBody = Prisma.BranchUncheckedCreateInput;
-
 export type ICreateProductBody = Prisma.ProductUncheckedCreateInput;
-
 export type ICreateOrderBody = Prisma.OrderUncheckedCreateInput;
-
 export type ICreateOrderItemBody = Prisma.OrderItemUncheckedCreateInput;
-
 export type ICreateCategoryBody = Prisma.CategoryUncheckedCreateInput;
-
 export type ICreateRecipeBody = Prisma.RecipeUncheckedCreateInput;
-
 export type ICreateRoleBody = Prisma.RoleUncheckedCreateInput;
-
 export type ICreateEmployeeBody = Prisma.EmployeeUncheckedCreateInput;
-
 export type ICreateRawMaterialBody = Prisma.RawMaterialUncheckedCreateInput;
 
 // Update
-
 export type IUpdateOrderItemBody = Prisma.OrderItemUncheckedUpdateInput;

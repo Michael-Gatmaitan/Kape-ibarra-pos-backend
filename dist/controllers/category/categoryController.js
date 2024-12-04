@@ -15,12 +15,20 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteCategoryById = exports.updateCategoryById = exports.createCategory = exports.getCategoryById = exports.getCategories = void 0;
 const db_1 = __importDefault(require("../../config/db"));
 const getCategories = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const categories = yield db_1.default.category.findMany({
-        include: {
-            products: true,
-        },
-    });
-    res.json(categories).status(200);
+    try {
+        const categories = yield db_1.default.category.findMany({
+            include: {
+                products: true,
+            },
+        });
+        res.json(categories).status(200);
+    }
+    catch (err) {
+        console.log(`There was an error getting all categories: ${err}`);
+        res
+            .json({ message: `There was an error getting all categories: ${err}` })
+            .status(401);
+    }
 });
 exports.getCategories = getCategories;
 const getCategoryById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {

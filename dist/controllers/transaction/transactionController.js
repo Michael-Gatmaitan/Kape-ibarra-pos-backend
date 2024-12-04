@@ -14,13 +14,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.updateTransactionById = exports.getTransactionById = exports.createTransaction = exports.getAllTransaction = void 0;
 const db_1 = __importDefault(require("../../config/db"));
+const transactionModel_1 = require("../../models/transactionModel");
 // For barista, get the order and all of the order items in order
 const getAllTransaction = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     // barista=true
     const order = req.query.order;
     const orderStatus = req.query.orderStatus;
     const orderBy = req.query.orderBy;
-    console.log("getting transactions");
     try {
         if (order === "true") {
             const transactions = yield db_1.default.transaction.findMany({
@@ -61,7 +61,6 @@ const getAllTransaction = (req, res) => __awaiter(void 0, void 0, void 0, functi
             return;
         }
         const transactions = yield db_1.default.transaction.findMany();
-        console.log(transactions);
         res.json(transactions);
     }
     catch (err) {
@@ -72,6 +71,54 @@ const getAllTransaction = (req, res) => __awaiter(void 0, void 0, void 0, functi
 exports.getAllTransaction = getAllTransaction;
 const createTransaction = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     console.log(req);
+    const transactionType = req.query.transactionType;
+    try {
+        if (transactionType === "customer") {
+            console.log("Transaction type: ", transactionType);
+            const { orderId, change = 0,
+            // totalAmount, // ?? walang transaction body sa accepting
+            // totalTendered,
+            // paymentMethod = "gcash",
+             } = req.body;
+            const order = yield db_1.default.order.findFirst({
+                where: { id: orderId },
+                include: { orderItems: true },
+            });
+            if (!(order === null || order === void 0 ? void 0 : order.id)) {
+                res.json({ message: `Online Order not found` });
+                return;
+            }
+            let totalAmountAndTotalTendered = 0;
+            order === null || order === void 0 ? void 0 : order.orderItems.map((orderItem) => {
+                totalAmountAndTotalTendered += orderItem.quantityAmount;
+            });
+            console.log("Total order price: ", totalAmountAndTotalTendered);
+            // update order total amount
+            yield db_1.default.order.update({
+                where: { id: orderId },
+                data: {
+                    totalPrice: totalAmountAndTotalTendered,
+                },
+            });
+            const newTransaction = yield (0, transactionModel_1.createTransactionModel)({
+                orderId,
+                change,
+                totalAmount: totalAmountAndTotalTendered,
+                totalTendered: totalAmountAndTotalTendered,
+                paymentMethod: "gcash",
+            });
+            console.log(newTransaction);
+            res.json(newTransaction);
+            return;
+        }
+    }
+    catch (err) {
+        res
+            .json({
+            message: `There was an error creating transaction for customer: ${err}`,
+        })
+            .status(401);
+    }
     res.json({ message: "Transaction complete created" });
 });
 exports.createTransaction = createTransaction;

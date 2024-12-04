@@ -8,7 +8,8 @@
     "build": "tsc",
     "start": "node dist/api.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "devWlogs": "nodemon src/index.ts"
   },
   "keywords": [],
   "author": "",
