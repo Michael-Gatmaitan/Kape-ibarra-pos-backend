@@ -17,11 +17,17 @@ import batchRoute from "../routes/batchRoutes";
 import inventoryRoute from "../routes/inventoryRoutes";
 import auditLogRoute from "../routes/auditLogRoutes";
 import eWalletRoute from "../routes/eWalletRoutes";
+import viewRoute from "../routes/viewRoutes";
+import functionRoute from "../routes/functionRoutes";
+import saleRoute from "../routes/saleRoutes";
 
 import prisma from "../config/db";
 import { generateToken } from "../auth/jwt";
 import { ICreateEmployeeBody } from "../types/types";
 import { auth } from "../middlewares/authMiddleware";
+
+import { setupTrigger } from "../prisma/triggers";
+import { setupFunctions } from "../prisma/functions";
 
 const app: Application = express();
 
@@ -38,6 +44,9 @@ app.get("/", async (req: Request, res: Response) => {
   res.json(products);
 });
 
+setupTrigger();
+setupFunctions();
+
 // authMiddleware(["admin", "customer"])
 app.use("/product", auth, productRoute);
 app.use("/category", auth, categoryRoute);
@@ -52,14 +61,13 @@ app.use("/batch", auth, batchRoute);
 app.use("/inventory", auth, inventoryRoute);
 app.use("/audit-log", auth, auditLogRoute);
 app.use("/e-wallet", auth, eWalletRoute);
+app.use("/view", auth, viewRoute);
+app.use("/function", functionRoute);
+app.use("/sale", auth, saleRoute);
 
 // (async function () {
 // seed
 // })();
-
-// app.post("/customer-login", (req: Request, res: Response) => {
-//   const body: { username: string; password: string } = req.body;
-// });
 
 app.post("/login", async (req: Request, res: Response) => {
   const body: { username: string; password: string } = req.body;
@@ -105,6 +113,32 @@ app.post("/login", async (req: Request, res: Response) => {
     }
   } catch (err) {
     res.json({ message: "There was an error logging in" });
+  }
+});
+
+app.post("/create-customer", async (req: Request, res: Response) => {
+  const body = req.body;
+  const { username } = req.body;
+
+  try {
+    const customerExisted = await prisma.customer.findFirst({
+      where: { username },
+    });
+
+    if (customerExisted?.id) {
+      res.json({ message: `Username already exists` }).status(401);
+    }
+
+    const newCustomer = await prisma.customer.create({
+      data: body,
+    });
+
+    console.log("New customer created: ", newCustomer);
+    res.json(newCustomer);
+  } catch (err) {
+    const message = `There was an error creating new customer: ${err}`;
+    console.log(message);
+    res.json({ message }).status(401);
   }
 });
 

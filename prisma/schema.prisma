@@ -58,6 +58,7 @@ model Order {
   orderType         String // 'walk-in', 'online'
   diningOption      String
   baristaId         String?  @db.Uuid
+  createdAt         DateTime @default(now())
 
   customer Customer? @relation(fields: [customerId], references: [id])
   employee Employee  @relation(fields: [employeeId], references: [id], name: "OrderEmployee", map: "fk_order_employee")

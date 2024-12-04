@@ -3,14 +3,7 @@ import prisma from "../../config/db";
 
 export const getAllCustomers = async (req: Request, res: Response) => {
   try {
-    const customers = await prisma.customer.findMany({
-      select: {
-        id: true,
-        firstname: true,
-        lastname: true,
-        username: true,
-      },
-    });
+    const customers = await prisma.customer.findMany();
 
     res.json(customers);
   } catch (err) {

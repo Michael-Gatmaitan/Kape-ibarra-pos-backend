@@ -51,18 +51,36 @@ export const getEmployeeById = async (req: Request, res: Response) => {
 
 // Create new employee using { req.body } if validated on frontend
 export const createEmployee = async (req: Request, res: Response) => {
-  const body: ICreateEmployeeBody = req.body;
-  // const body: { username: string; password: string } = req.body;
+  try {
+    const body: ICreateEmployeeBody = req.body;
+    // const body: { username: string; password: string } = req.body;
 
-  const newEmployee = await prisma.employee.create({
-    data: body,
-  });
+    const empolyeeExisted = await prisma.employee.findFirst({
+      where: {
+        username: body.username,
+      },
+    });
 
-  if (!newEmployee.id) {
-    res.json({ error: "Creation of new employee failed." });
+    if (empolyeeExisted?.id) {
+      res.json({ message: `Employee username already exists` }).status(401);
+      return;
+    }
+
+    const newEmployee = await prisma.employee.create({
+      data: body,
+    });
+
+    if (!newEmployee.id) {
+      res.json({ error: "Creation of new employee failed." });
+    }
+
+    res.json({ newEmployee });
+  } catch (err) {
+    console.log(err);
+    res
+      .json({ message: `There was a problem creating employee: ${err}` })
+      .status(401);
   }
-
-  res.json({ newEmployee });
 };
 
 // Get specific employee

@@ -98,6 +98,7 @@ export const createOrder = async (req: Request, res: Response) => {
       deductInventory(orderItemsBody);
 
       res.json(newOrder);
+      return;
     } else if (orderType === "online") {
       const newOrder = createOnlineOrder({
         customerId,

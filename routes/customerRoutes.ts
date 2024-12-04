@@ -7,6 +7,7 @@ import {
 const router = express.Router();
 
 router.get("/", getAllCustomers);
+// router.post("/", createCustomer);
 router.get("/:id", getCustomerById);
 
 export default router;
