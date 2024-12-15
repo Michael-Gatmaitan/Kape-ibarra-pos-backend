@@ -81,6 +81,7 @@ const createOrder = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
             //
             (0, depletionModel_1.deductInventory)(orderItemsBody);
             res.json(newOrder);
+            return;
         }
         else if (orderType === "online") {
             const newOrder = (0, orderModel_1.createOnlineOrder)({

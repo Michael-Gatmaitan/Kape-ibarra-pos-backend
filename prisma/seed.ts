@@ -13,6 +13,8 @@ async function deleteAllData() {
   await prisma.customer.deleteMany();
   await prisma.employee.deleteMany();
   await prisma.role.deleteMany();
+
+  await prisma.auditLog.deleteMany();
 }
 
 async function seedDatabase() {

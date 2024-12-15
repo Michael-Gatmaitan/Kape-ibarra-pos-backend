@@ -12,15 +12,17 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const express_1 = __importDefault(require("express"));
-const db_1 = __importDefault(require("../config/db"));
-const route = express_1.default.Router();
-route.get("/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const roles = yield db_1.default.role.findMany({
-        where: {
-            roleName: { not: "System" },
-        },
-    });
-    res.json(roles);
-}));
-exports.default = route;
+exports.getSales = void 0;
+const db_1 = __importDefault(require("../../config/db"));
+const getSales = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const sales = yield db_1.default.sales.findMany();
+        res.json(sales);
+    }
+    catch (err) {
+        const message = `There was an error getting sales ${err}`;
+        console.log(message);
+        res.json({ message }).status(401);
+    }
+});
+exports.getSales = getSales;

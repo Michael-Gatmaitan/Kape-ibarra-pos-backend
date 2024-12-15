@@ -14,7 +14,7 @@ export function authMiddleware(requiredRole: Role[]) {
       return;
     }
 
-    jwt.verify(token, SECRET_KEY, (err, decoded) => {
+    jwt.verify(token, `${SECRET_KEY}`, (err, decoded) => {
       if (err) {
         res.status(401).send("Invalid token");
         return;
@@ -44,7 +44,7 @@ export function auth(req: Request, res: Response, next: NextFunction) {
     return;
   }
 
-  jwt.verify(token, SECRET_KEY, (err, decoded) => {
+  jwt.verify(token, `${SECRET_KEY}`, (err, decoded) => {
     if (err) {
       res.status(401).json({ message: "Invalid token" });
       return;

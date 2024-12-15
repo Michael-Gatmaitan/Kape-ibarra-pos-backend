@@ -16,14 +16,7 @@ exports.getCustomerById = exports.getAllCustomers = void 0;
 const db_1 = __importDefault(require("../../config/db"));
 const getAllCustomers = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const customers = yield db_1.default.customer.findMany({
-            select: {
-                id: true,
-                firstname: true,
-                lastname: true,
-                username: true,
-            },
-        });
+        const customers = yield db_1.default.customer.findMany();
         res.json(customers);
     }
     catch (err) {

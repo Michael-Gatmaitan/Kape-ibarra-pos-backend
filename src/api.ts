@@ -1,6 +1,6 @@
 import express, { Application, Request, Response } from "express";
 import cors from "cors";
-import dotenv from "dotenv";
+import * as dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 
 // Routes
@@ -37,7 +37,8 @@ app.use(cookieParser());
 
 dotenv.config();
 
-const PORT = process.env.PORT || 9999;
+const PORT = process.env.PORT;
+console.log("POERT: ", PORT);
 
 app.get("/", async (req: Request, res: Response) => {
   const products = await prisma.product.findMany();
@@ -112,7 +113,7 @@ app.post("/login", async (req: Request, res: Response) => {
       res.json({ token });
     }
   } catch (err) {
-    res.json({ message: "There was an error logging in" });
+    res.json({ message: `There was an error logging in: ${err}` });
   }
 });
 

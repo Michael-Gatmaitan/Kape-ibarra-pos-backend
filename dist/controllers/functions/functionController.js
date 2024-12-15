@@ -12,15 +12,23 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const express_1 = __importDefault(require("express"));
-const db_1 = __importDefault(require("../config/db"));
-const route = express_1.default.Router();
-route.get("/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const roles = yield db_1.default.role.findMany({
-        where: {
-            roleName: { not: "System" },
-        },
-    });
-    res.json(roles);
-}));
-exports.default = route;
+exports.calculateOrderAmount = void 0;
+const db_1 = __importDefault(require("../../config/db"));
+const calculateOrderAmount = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const request = yield db_1.default.$queryRaw `CREATE OR REPLACE FUNCTION calculate_order_amount("order_id" UUID) 
+    RETURNS FLOAT AS $$
+    DECLARE
+      total_amount FLOAT := 0;
+    BEGIN
+      SELECT SUM(oi."quantityAmount")
+      INTO total_amount
+      FROM "OrderItem" oi
+      WHERE oi."orderId" = order_id;
+      RETURN total_amount;
+    END;
+    $$ LANGUAGE plpgsql;
+  `;
+    console.log(request);
+    res.json(request);
+});
+exports.calculateOrderAmount = calculateOrderAmount;

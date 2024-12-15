@@ -12,15 +12,23 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const express_1 = __importDefault(require("express"));
-const db_1 = __importDefault(require("../config/db"));
-const route = express_1.default.Router();
-route.get("/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const roles = yield db_1.default.role.findMany({
-        where: {
-            roleName: { not: "System" },
-        },
-    });
-    res.json(roles);
-}));
-exports.default = route;
+exports.getOrderByCustomerId = exports.getTotalOrders = void 0;
+const db_1 = __importDefault(require("../../config/db"));
+const getTotalOrders = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const customView = yield db_1.default.$queryRaw `
+    CREATE OR REPLACE VIEW raw_material_usage AS
+    SELECT r."materialName", pr."productName", sum(rec."quantityInUnitPcsNeeded") AS total_quantity_needed
+    FROM
+        "Recipe" rec
+        JOIN "RawMaterial" r ON rec."rawMaterialId" = r."id"
+        JOIN "Product" pr ON rec."productId" = pr."id"
+    GROUP BY
+        r."materialName",
+        pr."productName";
+  `;
+    console.log(customView);
+    res.json(customView);
+});
+exports.getTotalOrders = getTotalOrders;
+const getOrderByCustomerId = (req, res) => __awaiter(void 0, void 0, void 0, function* () { });
+exports.getOrderByCustomerId = getOrderByCustomerId;

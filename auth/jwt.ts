@@ -1,12 +1,12 @@
 import prisma from "../config/db";
 import { Request, Response, NextFunction } from "express";
 import { ICustomer, IEmployee } from "../types/types";
-import jwt, { JwtPayload, Secret } from "jsonwebtoken";
-import { Role } from "@prisma/client";
-
-const SECRET_KEY: Secret = process.env.SECRET_KEY as string;
+import jwt, { Secret } from "jsonwebtoken";
 
 export const generateToken = async (person: ICustomer | IEmployee) => {
+  const SECRET_KEY: Secret = process.env.SECRET_KEY as string;
+  console.log(SECRET_KEY);
+
   if ("roleId" in person) {
     const roleName = (
       await prisma.role.findFirstOrThrow({ where: { id: person.roleId } })
@@ -24,6 +24,7 @@ export const verifyToken = (
   next: NextFunction
 ) => {
   const token = req.headers["authorization"];
+  const SECRET_KEY: Secret = process.env.SECRET_KEY as string;
 
   if (!token) {
     res.status(401).json({ error: "Access denied" });
@@ -40,8 +41,7 @@ export const verifyToken = (
 };
 
 export const decrpytToken = async (token: string) => {
-  // let payload: { person: IEmployee | ICustomer; roleName: Role };
-
+  const SECRET_KEY: Secret = process.env.SECRET_KEY as string;
   let payload = jwt.verify(token, SECRET_KEY, (err, decoded) => {
     if (err) {
       return "Invalid token";

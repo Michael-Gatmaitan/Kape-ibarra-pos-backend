@@ -30,9 +30,14 @@ const batchRoutes_1 = __importDefault(require("../routes/batchRoutes"));
 const inventoryRoutes_1 = __importDefault(require("../routes/inventoryRoutes"));
 const auditLogRoutes_1 = __importDefault(require("../routes/auditLogRoutes"));
 const eWalletRoutes_1 = __importDefault(require("../routes/eWalletRoutes"));
+const viewRoutes_1 = __importDefault(require("../routes/viewRoutes"));
+const functionRoutes_1 = __importDefault(require("../routes/functionRoutes"));
+const saleRoutes_1 = __importDefault(require("../routes/saleRoutes"));
 const db_1 = __importDefault(require("../config/db"));
 const jwt_1 = require("../auth/jwt");
 const authMiddleware_1 = require("../middlewares/authMiddleware");
+const triggers_1 = require("../prisma/triggers");
+const functions_1 = require("../prisma/functions");
 const app = (0, express_1.default)();
 app.use(express_1.default.json());
 app.use((0, cors_1.default)());
@@ -43,6 +48,8 @@ app.get("/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const products = yield db_1.default.product.findMany();
     res.json(products);
 }));
+(0, triggers_1.setupTrigger)();
+(0, functions_1.setupFunctions)();
 // authMiddleware(["admin", "customer"])
 app.use("/product", authMiddleware_1.auth, productRoutes_1.default);
 app.use("/category", authMiddleware_1.auth, categoryRoutes_1.default);
@@ -57,12 +64,12 @@ app.use("/batch", authMiddleware_1.auth, batchRoutes_1.default);
 app.use("/inventory", authMiddleware_1.auth, inventoryRoutes_1.default);
 app.use("/audit-log", authMiddleware_1.auth, auditLogRoutes_1.default);
 app.use("/e-wallet", authMiddleware_1.auth, eWalletRoutes_1.default);
+app.use("/view", authMiddleware_1.auth, viewRoutes_1.default);
+app.use("/function", functionRoutes_1.default);
+app.use("/sale", authMiddleware_1.auth, saleRoutes_1.default);
 // (async function () {
 // seed
 // })();
-// app.post("/customer-login", (req: Request, res: Response) => {
-//   const body: { username: string; password: string } = req.body;
-// });
 app.post("/login", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const body = req.body;
     const loginType = req.query.loginType;
@@ -103,6 +110,28 @@ app.post("/login", (req, res) => __awaiter(void 0, void 0, void 0, function* () 
     }
     catch (err) {
         res.json({ message: "There was an error logging in" });
+    }
+}));
+app.post("/create-customer", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const body = req.body;
+    const { username } = req.body;
+    try {
+        const customerExisted = yield db_1.default.customer.findFirst({
+            where: { username },
+        });
+        if (customerExisted === null || customerExisted === void 0 ? void 0 : customerExisted.id) {
+            res.json({ message: `Username already exists` }).status(401);
+        }
+        const newCustomer = yield db_1.default.customer.create({
+            data: body,
+        });
+        console.log("New customer created: ", newCustomer);
+        res.json(newCustomer);
+    }
+    catch (err) {
+        const message = `There was an error creating new customer: ${err}`;
+        console.log(message);
+        res.json({ message }).status(401);
     }
 }));
 app.post("/signup", (req, res) => __awaiter(void 0, void 0, void 0, function* () {

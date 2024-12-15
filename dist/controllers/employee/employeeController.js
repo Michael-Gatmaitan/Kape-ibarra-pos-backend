@@ -61,15 +61,32 @@ const getEmployeeById = (req, res) => __awaiter(void 0, void 0, void 0, function
 exports.getEmployeeById = getEmployeeById;
 // Create new employee using { req.body } if validated on frontend
 const createEmployee = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const body = req.body;
-    // const body: { username: string; password: string } = req.body;
-    const newEmployee = yield db_1.default.employee.create({
-        data: body,
-    });
-    if (!newEmployee.id) {
-        res.json({ error: "Creation of new employee failed." });
+    try {
+        const body = req.body;
+        // const body: { username: string; password: string } = req.body;
+        const empolyeeExisted = yield db_1.default.employee.findFirst({
+            where: {
+                username: body.username,
+            },
+        });
+        if (empolyeeExisted === null || empolyeeExisted === void 0 ? void 0 : empolyeeExisted.id) {
+            res.json({ message: `Employee username already exists` }).status(401);
+            return;
+        }
+        const newEmployee = yield db_1.default.employee.create({
+            data: body,
+        });
+        if (!newEmployee.id) {
+            res.json({ error: "Creation of new employee failed." });
+        }
+        res.json({ newEmployee });
     }
-    res.json({ newEmployee });
+    catch (err) {
+        console.log(err);
+        res
+            .json({ message: `There was a problem creating employee: ${err}` })
+            .status(401);
+    }
 });
 exports.createEmployee = createEmployee;
 // Get specific employee
