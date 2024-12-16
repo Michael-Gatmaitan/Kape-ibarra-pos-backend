@@ -60,8 +60,6 @@ export function auth(req: Request, res: Response, next: NextFunction) {
       res.status(403).json({ message: "Forbidden" });
     }
 
-    console.log("User valid: ", payload);
-
     next();
   });
 }

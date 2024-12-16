@@ -11,7 +11,6 @@ import {
 } from "../../models/orderModel";
 import { deductInventory } from "../../models/depletionModel";
 
-const systemEmpId = process.env.SYSTEM_EMPLOYEE_ID!;
 interface ICreateOrderSelf {
   orderBody: ICreateOrderBody;
   orderItemsBody: Prisma.OrderItemCreateManyInput[];
@@ -121,6 +120,8 @@ export const createOrder = async (req: Request, res: Response) => {
 export const updateOrderById = async (req: Request, res: Response) => {
   const id = req.params.id as string;
   const updateType = req.query.updateType;
+  const systemEmpId = process.env.SYSTEM_EMPLOYEE_ID!;
+  console.log(`Updating some order status with params of: ${updateType}`);
 
   try {
     const orderToUpdate = await prisma.order.findFirst({ where: { id } });
@@ -235,8 +236,8 @@ export const getOrderById = async (req: Request, res: Response) => {
         orderItems:
           orderItems === "true"
             ? {
-                include: { product: true },
-              }
+              include: { product: true },
+            }
             : false,
         employee: employee === "true",
         customer: customer === "true",
