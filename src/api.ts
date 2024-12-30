@@ -61,7 +61,7 @@ app.use("/customer", auth, customerRoute);
 app.use("/batch", auth, batchRoute);
 app.use("/inventory", auth, inventoryRoute);
 app.use("/audit-log", auth, auditLogRoute);
-app.use("/e-wallet", auth, eWalletRoute);
+app.use("/ewallet", auth, eWalletRoute);
 app.use("/view", auth, viewRoute);
 app.use("/function", functionRoute);
 app.use("/sale", auth, saleRoute);
