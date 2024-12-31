@@ -17,7 +17,6 @@ const db_1 = __importDefault(require("../../config/db"));
 const transactionModel_1 = require("../../models/transactionModel");
 const orderModel_1 = require("../../models/orderModel");
 const depletionModel_1 = require("../../models/depletionModel");
-const systemEmpId = process.env.SYSTEM_EMPLOYEE_ID;
 /**
  *
  * @param orderBody
@@ -105,6 +104,8 @@ exports.createOrder = createOrder;
 const updateOrderById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const id = req.params.id;
     const updateType = req.query.updateType;
+    const systemEmpId = process.env.SYSTEM_EMPLOYEE_ID;
+    console.log(`Updating some order status with params of: ${updateType}`);
     try {
         const orderToUpdate = yield db_1.default.order.findFirst({ where: { id } });
         if (!orderToUpdate) {

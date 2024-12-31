@@ -15,8 +15,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.decrpytToken = exports.verifyToken = exports.generateToken = void 0;
 const db_1 = __importDefault(require("../config/db"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
-const SECRET_KEY = process.env.SECRET_KEY;
 const generateToken = (person) => __awaiter(void 0, void 0, void 0, function* () {
+    const SECRET_KEY = process.env.SECRET_KEY;
+    console.log(SECRET_KEY);
     if ("roleId" in person) {
         const roleName = (yield db_1.default.role.findFirstOrThrow({ where: { id: person.roleId } })).roleName;
         return jsonwebtoken_1.default.sign({ person, roleName }, SECRET_KEY);
@@ -28,6 +29,7 @@ const generateToken = (person) => __awaiter(void 0, void 0, void 0, function* ()
 exports.generateToken = generateToken;
 const verifyToken = (req, res, next) => {
     const token = req.headers["authorization"];
+    const SECRET_KEY = process.env.SECRET_KEY;
     if (!token) {
         res.status(401).json({ error: "Access denied" });
         return;
@@ -42,7 +44,7 @@ const verifyToken = (req, res, next) => {
 };
 exports.verifyToken = verifyToken;
 const decrpytToken = (token) => __awaiter(void 0, void 0, void 0, function* () {
-    // let payload: { person: IEmployee | ICustomer; roleName: Role };
+    const SECRET_KEY = process.env.SECRET_KEY;
     let payload = jsonwebtoken_1.default.verify(token, SECRET_KEY, (err, decoded) => {
         if (err) {
             return "Invalid token";
